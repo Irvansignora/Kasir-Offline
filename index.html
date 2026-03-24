@@ -672,6 +672,86 @@
     ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
     /* =============================================
+       SETTING TOKO PAGE
+    ============================================= */
+    .setting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .setting-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .setting-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .setting-card-title {
+      font-family: var(--font-head);
+      font-size: 14px; font-weight: 700;
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .setting-preview {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .setting-preview .prev-name {
+      font-family: var(--font-head);
+      font-size: 15px; font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .setting-preview .prev-tag {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      opacity: 0.6;
+    }
+
+    /* Theme selector */
+    .theme-options {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .theme-swatch {
+      width: 36px; height: 36px; border-radius: 8px;
+      cursor: pointer; border: 2px solid transparent;
+      transition: all 0.15s; position: relative;
+    }
+    .theme-swatch.active { border-color: white; transform: scale(1.15); }
+    .theme-swatch:hover { transform: scale(1.1); }
+
+    /* Struk preview */
+    .struk-mini-preview {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 11px; line-height: 1.9;
+      color: var(--muted);
+      margin-top: 16px;
+      text-align: center;
+    }
+    .struk-mini-preview .sp-name {
+      font-size: 13px; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.05em;
+    }
+
+    /* =============================================
        RESPONSIVE (minimal, karena desktop app)
     ============================================= */
     @media (max-width: 900px) {
@@ -743,6 +823,9 @@
       <div class="nav-label">Admin</div>
       <div class="nav-item" onclick="showPage('users')">
         <span class="nav-icon">👥</span> Pengguna
+      </div>
+      <div class="nav-item" onclick="showPage('setting')">
+        <span class="nav-icon">⚙️</span> Setting Toko
       </div>
     </div>
 
@@ -913,6 +996,146 @@
       <div id="users-list"></div>
     </div>
 
+    <!-- ======== PAGE: SETTING TOKO ======== -->
+    <div class="page-body hidden" id="pg-setting">
+      <div class="page-header">
+        <h2>⚙️ Setting Toko</h2>
+        <button class="btn btn-primary" onclick="saveSetting()">💾 Simpan Perubahan</button>
+      </div>
+      <div class="setting-grid">
+
+        <!-- Identitas Toko -->
+        <div class="setting-card">
+          <div class="setting-card-title">🏪 Identitas Toko</div>
+          <div class="form-group">
+            <label>Nama Toko</label>
+            <input type="text" id="st-nama" class="form-input" placeholder="contoh: Toko Maju Jaya" oninput="updateSettingPreview()" />
+          </div>
+          <div class="form-group">
+            <label>Tagline / Slogan</label>
+            <input type="text" id="st-tagline" class="form-input" placeholder="contoh: Belanja Lebih Hemat!" oninput="updateSettingPreview()" />
+          </div>
+          <div class="form-group">
+            <label>Alamat Toko</label>
+            <input type="text" id="st-alamat" class="form-input" placeholder="contoh: Jl. Merdeka No. 1, Jakarta" oninput="updateSettingPreview()" />
+          </div>
+          <div class="form-group">
+            <label>No. Telepon</label>
+            <input type="text" id="st-telp" class="form-input" placeholder="contoh: 0812-3456-7890" oninput="updateSettingPreview()" />
+          </div>
+          <div class="setting-preview">
+            <div class="prev-tag">Preview Sidebar &amp; Login</div>
+            <div class="prev-name" id="prev-nama">KasirKu</div>
+            <div id="prev-tagline" style="font-size:11px;color:var(--muted)">Sistem POS Modern</div>
+          </div>
+        </div>
+
+        <!-- Struk / Nota -->
+        <div class="setting-card">
+          <div class="setting-card-title">🧾 Pengaturan Struk</div>
+          <div class="form-group">
+            <label>Header Struk</label>
+            <input type="text" id="st-struk-header" class="form-input" placeholder="contoh: Toko Maju Jaya" oninput="updateStrukPreview()" />
+          </div>
+          <div class="form-group">
+            <label>Pesan Footer Struk</label>
+            <input type="text" id="st-struk-footer" class="form-input" placeholder="contoh: Terima kasih sudah berbelanja! 🙏" oninput="updateStrukPreview()" />
+          </div>
+          <div class="form-group">
+            <label>Tampilkan Alamat di Struk</label>
+            <select id="st-show-alamat" class="form-input" onchange="updateStrukPreview()">
+              <option value="1">Ya, tampilkan</option>
+              <option value="0">Tidak</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tampilkan No. Telp di Struk</label>
+            <select id="st-show-telp" class="form-input" onchange="updateStrukPreview()">
+              <option value="1">Ya, tampilkan</option>
+              <option value="0">Tidak</option>
+            </select>
+          </div>
+          <div class="struk-mini-preview" id="struk-preview">
+            <div class="sp-name">🏪 Nama Toko</div>
+            <div>Jl. Alamat Toko</div>
+            <div>Telp: 0812-xxxx</div>
+            <div style="border-top:1px dashed var(--border);margin:6px 0;padding-top:6px">Item × Qty  |  Harga</div>
+            <div style="border-top:1px dashed var(--border);margin:6px 0;padding-top:6px">TOTAL  |  Bayar  |  Kembali</div>
+            <div style="margin-top:6px;opacity:0.7;font-size:10px">✨ Pesan footer toko ✨</div>
+          </div>
+        </div>
+
+        <!-- Tampilan & Tema -->
+        <div class="setting-card">
+          <div class="setting-card-title">🎨 Tampilan &amp; Tema</div>
+          <div class="form-group">
+            <label>Warna Aksen</label>
+            <div class="theme-options" id="theme-swatches">
+              <div class="theme-swatch active" data-color="#f5c842" style="background:#f5c842" title="Kuning (Default)" onclick="selectTheme('#f5c842','#e8a020')"></div>
+              <div class="theme-swatch" data-color="#3ddc84" style="background:#3ddc84" title="Hijau" onclick="selectTheme('#3ddc84','#2bbf6a')"></div>
+              <div class="theme-swatch" data-color="#4da6ff" style="background:#4da6ff" title="Biru" onclick="selectTheme('#4da6ff','#2d8ae8')"></div>
+              <div class="theme-swatch" data-color="#ff6b9d" style="background:#ff6b9d" title="Pink" onclick="selectTheme('#ff6b9d','#e8507e')"></div>
+              <div class="theme-swatch" data-color="#a78bfa" style="background:#a78bfa" title="Ungu" onclick="selectTheme('#a78bfa','#8b6de8')"></div>
+              <div class="theme-swatch" data-color="#fb923c" style="background:#fb923c" title="Oranye" onclick="selectTheme('#fb923c','#e07020')"></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:20px">
+            <label>Mode Tampilan</label>
+            <select id="st-darkmode" class="form-input" onchange="applyDisplayMode()">
+              <option value="dark">🌙 Dark Mode (Default)</option>
+              <option value="light">☀️ Light Mode</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Emoji / Ikon Toko</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px" id="emoji-options">
+              <span class="emoji-opt active" onclick="selectEmoji(this,'🏪')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:rgba(245,200,66,0.15);border:2px solid var(--accent)">🏪</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'🛒')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">🛒</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'🏬')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">🏬</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'☕')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">☕</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'🍕')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">🍕</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'👗')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">👗</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'💊')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">💊</span>
+              <span class="emoji-opt" onclick="selectEmoji(this,'📱')" style="font-size:24px;cursor:pointer;padding:6px;border-radius:8px;background:var(--surface2);border:2px solid transparent">📱</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operasional -->
+        <div class="setting-card">
+          <div class="setting-card-title">🔧 Operasional</div>
+          <div class="form-group">
+            <label>Batas Stok Menipis</label>
+            <input type="number" id="st-low-stock" class="form-input" placeholder="Default: 5" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Mata Uang</label>
+            <select id="st-currency" class="form-input">
+              <option value="Rp">Rupiah (Rp)</option>
+              <option value="$">Dollar ($)</option>
+              <option value="RM">Ringgit (RM)</option>
+              <option value="SGD">Singapore Dollar (SGD)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pajak / PPN (%)</label>
+            <input type="number" id="st-pajak" class="form-input" placeholder="0 = tanpa pajak" min="0" max="100" />
+          </div>
+          <div class="form-group">
+            <label>Reset Data</label>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-danger btn-sm" onclick="resetProduk()">🗑 Reset Produk</button>
+              <button class="btn btn-danger btn-sm" onclick="resetTransaksi()">🗑 Reset Transaksi</button>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:rgba(61,220,132,0.06);border:1px solid rgba(61,220,132,0.2);border-radius:var(--radius-sm);font-size:12px;color:var(--muted)">
+            <span style="color:var(--green)">ℹ️</span> Semua data tersimpan lokal di perangkat ini. Tidak ada koneksi internet yang diperlukan.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div><!-- end main-content -->
 </div><!-- end page-app -->
 
@@ -1058,7 +1281,8 @@ function hashPass(plain) {
    FORMAT RUPIAH
 ============================================================= */
 function rp(n) {
-  return 'Rp ' + Number(n).toLocaleString('id-ID');
+  const s = getSetting ? getSetting() : { currency: 'Rp' };
+  return s.currency + ' ' + Number(n).toLocaleString('id-ID');
 }
 
 /* =============================================================
@@ -1150,6 +1374,9 @@ function loadApp(user) {
     document.getElementById('nav-admin').style.display = 'block';
   }
 
+  // Terapkan setting toko
+  applyTokoSettings();
+
   startClock();
   showPage('dashboard');
 }
@@ -1163,6 +1390,7 @@ const pageMap = {
   produk:    { el: 'pg-produk',    title: '📦 Manajemen Produk', onShow: renderProdukTable },
   riwayat:   { el: 'pg-riwayat',  title: '📋 Riwayat Transaksi',onShow: renderRiwayat },
   users:     { el: 'pg-users',    title: '👥 Pengguna',          onShow: renderUsers },
+  setting:   { el: 'pg-setting',  title: '⚙️ Setting Toko',      onShow: renderSetting },
 };
 
 function showPage(name) {
@@ -1197,7 +1425,8 @@ function renderDashboard() {
 
   const trxHariIni = transaksi.filter(t => new Date(t.waktu).toLocaleDateString('id-ID') === today);
   const omset      = trxHariIni.reduce((s, t) => s + t.total, 0);
-  const lowStock   = produk.filter(p => p.stok > 0 && p.stok <= 5).length;
+  const lowThresh  = (getSetting().lowStock || 5);
+  const lowStock   = produk.filter(p => p.stok > 0 && p.stok <= lowThresh).length;
 
   document.getElementById('stat-produk').textContent  = produk.length;
   document.getElementById('stat-trx').textContent     = trxHariIni.length;
@@ -1237,8 +1466,9 @@ function renderProdukTable() {
   }
 
   tbody.innerHTML = arr.map(p => {
-    const badgeClass = p.stok === 0 ? 'zero' : p.stok <= 5 ? 'low' : 'ok';
-    const badgeLabel = p.stok === 0 ? 'Habis' : p.stok <= 5 ? `Menipis (${p.stok})` : p.stok;
+    const thresh = getSetting().lowStock || 5;
+    const badgeClass = p.stok === 0 ? 'zero' : p.stok <= thresh ? 'low' : 'ok';
+    const badgeLabel = p.stok === 0 ? 'Habis' : p.stok <= thresh ? `Menipis (${p.stok})` : p.stok;
     return `
       <tr>
         <td class="text-mono text-muted">#${p.id}</td>
@@ -1494,23 +1724,31 @@ function processTransaction() {
 
 /* Tampilkan struk transaksi */
 function showStruk(t) {
+  const s = getSetting();
   const itemRows = t.items.map(i =>
     `<div class="struk-row"><span>${i.nama} x${i.qty}</span><span>${rp(i.subtotal)}</span></div>`
   ).join('');
 
+  const alamatLine = (s.showAlamat === '1' && s.alamat) ? `<div style="color:var(--muted);font-size:11px">${s.alamat}</div>` : '';
+  const telpLine   = (s.showTelp   === '1' && s.telp)   ? `<div style="color:var(--muted);font-size:11px">Telp: ${s.telp}</div>` : '';
+  const totalAfterPajak = s.pajak > 0 ? t.total * (1 + s.pajak / 100) : t.total;
+  const pajakLine = s.pajak > 0 ? `<div class="struk-row"><span>PPN (${s.pajak}%)</span><span>${rp(totalAfterPajak - t.total)}</span></div>` : '';
+
   document.getElementById('struk-content').innerHTML = `
     <div class="struk-header">
-      <h4>🏪 KasirKu</h4>
+      <h4>${s.emoji} ${s.strukHeader}</h4>
+      ${alamatLine}${telpLine}
       <div style="color:var(--muted);font-size:11px">${new Date(t.waktu).toLocaleString('id-ID')}</div>
       <div style="color:var(--muted);font-size:11px">Kasir: ${t.kasir} | ${t.id}</div>
     </div>
     <hr class="struk-divider" />
     ${itemRows}
     <hr class="struk-divider" />
-    <div class="struk-row bold"><span>TOTAL</span><span>${rp(t.total)}</span></div>
+    ${pajakLine}
+    <div class="struk-row bold"><span>TOTAL</span><span>${rp(s.pajak > 0 ? totalAfterPajak : t.total)}</span></div>
     <div class="struk-row"><span>Bayar</span><span>${rp(t.bayar)}</span></div>
     <div class="struk-row" style="color:var(--green)"><span>Kembalian</span><span>${rp(t.kembalian)}</span></div>
-    <div class="struk-footer">Terima kasih telah berbelanja! ✨</div>
+    <div class="struk-footer">${s.strukFooter}</div>
   `;
   openModal('modal-struk');
 }
@@ -1617,6 +1855,210 @@ function hapusUser(id) {
 }
 
 /* =============================================================
+   SETTING TOKO
+============================================================= */
+const DEFAULT_SETTING = {
+  nama: 'KasirKu',
+  tagline: 'Sistem POS Modern',
+  alamat: '',
+  telp: '',
+  strukHeader: 'KasirKu',
+  strukFooter: 'Terima kasih telah berbelanja! ✨',
+  showAlamat: '1',
+  showTelp: '1',
+  accentColor: '#f5c842',
+  accentColor2: '#e8a020',
+  darkMode: 'dark',
+  emoji: '🏪',
+  lowStock: 5,
+  currency: 'Rp',
+  pajak: 0,
+};
+
+function getSetting() {
+  return Object.assign({}, DEFAULT_SETTING, DB.get('setting') || {});
+}
+
+function renderSetting() {
+  const s = getSetting();
+  document.getElementById('st-nama').value          = s.nama;
+  document.getElementById('st-tagline').value       = s.tagline;
+  document.getElementById('st-alamat').value        = s.alamat;
+  document.getElementById('st-telp').value          = s.telp;
+  document.getElementById('st-struk-header').value  = s.strukHeader;
+  document.getElementById('st-struk-footer').value  = s.strukFooter;
+  document.getElementById('st-show-alamat').value   = s.showAlamat;
+  document.getElementById('st-show-telp').value     = s.showTelp;
+  document.getElementById('st-darkmode').value      = s.darkMode;
+  document.getElementById('st-low-stock').value     = s.lowStock;
+  document.getElementById('st-currency').value      = s.currency;
+  document.getElementById('st-pajak').value         = s.pajak;
+
+  // Highlight active swatch
+  document.querySelectorAll('.theme-swatch').forEach(sw => {
+    sw.classList.toggle('active', sw.dataset.color === s.accentColor);
+  });
+  // Highlight active emoji
+  document.querySelectorAll('.emoji-opt').forEach(em => {
+    const isActive = em.textContent === s.emoji;
+    em.style.background    = isActive ? 'rgba(245,200,66,0.15)' : 'var(--surface2)';
+    em.style.borderColor   = isActive ? 'var(--accent)' : 'transparent';
+  });
+
+  updateSettingPreview();
+  updateStrukPreview();
+}
+
+function updateSettingPreview() {
+  const nama    = document.getElementById('st-nama')?.value    || 'KasirKu';
+  const tagline = document.getElementById('st-tagline')?.value || 'Sistem POS Modern';
+  const el = document.getElementById('prev-nama');
+  const el2 = document.getElementById('prev-tagline');
+  if (el)  el.textContent  = nama;
+  if (el2) el2.textContent = tagline;
+}
+
+function updateStrukPreview() {
+  const header     = document.getElementById('st-struk-header')?.value  || 'Nama Toko';
+  const footer     = document.getElementById('st-struk-footer')?.value  || 'Terima kasih! ✨';
+  const alamat     = document.getElementById('st-alamat')?.value        || 'Jl. Alamat Toko';
+  const telp       = document.getElementById('st-telp')?.value          || '0812-xxxx';
+  const showAlamat = document.getElementById('st-show-alamat')?.value   || '1';
+  const showTelp   = document.getElementById('st-show-telp')?.value     || '1';
+  const prev = document.getElementById('struk-preview');
+  if (!prev) return;
+  prev.innerHTML = `
+    <div class="sp-name">🏪 ${header}</div>
+    ${showAlamat === '1' ? `<div>${alamat}</div>` : ''}
+    ${showTelp   === '1' ? `<div>Telp: ${telp}</div>` : ''}
+    <div style="border-top:1px dashed var(--border);margin:6px 0;padding-top:6px">Item × Qty  |  Harga</div>
+    <div style="border-top:1px dashed var(--border);margin:6px 0;padding-top:6px">TOTAL  |  Bayar  |  Kembali</div>
+    <div style="margin-top:6px;opacity:0.7;font-size:10px">${footer}</div>
+  `;
+}
+
+let _currentEmoji = '🏪';
+function selectEmoji(el, emoji) {
+  _currentEmoji = emoji;
+  document.querySelectorAll('.emoji-opt').forEach(e => {
+    e.style.background  = 'var(--surface2)';
+    e.style.borderColor = 'transparent';
+  });
+  el.style.background  = 'rgba(245,200,66,0.15)';
+  el.style.borderColor = 'var(--accent)';
+}
+
+let _currentAccent  = '#f5c842';
+let _currentAccent2 = '#e8a020';
+function selectTheme(c1, c2) {
+  _currentAccent  = c1;
+  _currentAccent2 = c2;
+  document.querySelectorAll('.theme-swatch').forEach(sw => {
+    sw.classList.toggle('active', sw.dataset.color === c1);
+  });
+  // Live preview
+  document.documentElement.style.setProperty('--accent',  c1);
+  document.documentElement.style.setProperty('--accent2', c2);
+}
+
+function applyDisplayMode() {
+  const mode = document.getElementById('st-darkmode')?.value || 'dark';
+  if (mode === 'light') {
+    document.documentElement.style.setProperty('--bg',       '#f0f2f7');
+    document.documentElement.style.setProperty('--surface',  '#ffffff');
+    document.documentElement.style.setProperty('--surface2', '#e8eaf0');
+    document.documentElement.style.setProperty('--border',   '#d0d4e0');
+    document.documentElement.style.setProperty('--text',     '#1a1d2b');
+    document.documentElement.style.setProperty('--muted',    '#6b7280');
+  } else {
+    document.documentElement.style.setProperty('--bg',       '#0d0f14');
+    document.documentElement.style.setProperty('--surface',  '#161920');
+    document.documentElement.style.setProperty('--surface2', '#1e2230');
+    document.documentElement.style.setProperty('--border',   '#2a2f3d');
+    document.documentElement.style.setProperty('--text',     '#eef0f5');
+    document.documentElement.style.setProperty('--muted',    '#7a8099');
+  }
+}
+
+function saveSetting() {
+  const s = {
+    nama:         document.getElementById('st-nama').value.trim()         || 'KasirKu',
+    tagline:      document.getElementById('st-tagline').value.trim()      || 'Sistem POS Modern',
+    alamat:       document.getElementById('st-alamat').value.trim(),
+    telp:         document.getElementById('st-telp').value.trim(),
+    strukHeader:  document.getElementById('st-struk-header').value.trim() || 'KasirKu',
+    strukFooter:  document.getElementById('st-struk-footer').value.trim() || 'Terima kasih! ✨',
+    showAlamat:   document.getElementById('st-show-alamat').value,
+    showTelp:     document.getElementById('st-show-telp').value,
+    accentColor:  _currentAccent,
+    accentColor2: _currentAccent2,
+    darkMode:     document.getElementById('st-darkmode').value,
+    emoji:        _currentEmoji,
+    lowStock:     parseInt(document.getElementById('st-low-stock').value) || 5,
+    currency:     document.getElementById('st-currency').value,
+    pajak:        parseFloat(document.getElementById('st-pajak').value)   || 0,
+  };
+  DB.set('setting', s);
+  applyTokoSettings();
+  toast('Setting berhasil disimpan! ✅', 'success');
+}
+
+function applyTokoSettings() {
+  const s = getSetting();
+
+  // Terapkan warna aksen
+  document.documentElement.style.setProperty('--accent',  s.accentColor);
+  document.documentElement.style.setProperty('--accent2', s.accentColor2);
+
+  // Terapkan dark/light mode
+  if (s.darkMode === 'light') {
+    document.documentElement.style.setProperty('--bg',       '#f0f2f7');
+    document.documentElement.style.setProperty('--surface',  '#ffffff');
+    document.documentElement.style.setProperty('--surface2', '#e8eaf0');
+    document.documentElement.style.setProperty('--border',   '#d0d4e0');
+    document.documentElement.style.setProperty('--text',     '#1a1d2b');
+    document.documentElement.style.setProperty('--muted',    '#6b7280');
+  } else {
+    document.documentElement.style.setProperty('--bg',       '#0d0f14');
+    document.documentElement.style.setProperty('--surface',  '#161920');
+    document.documentElement.style.setProperty('--surface2', '#1e2230');
+    document.documentElement.style.setProperty('--border',   '#2a2f3d');
+    document.documentElement.style.setProperty('--text',     '#eef0f5');
+    document.documentElement.style.setProperty('--muted',    '#7a8099');
+  }
+
+  // Update nama di sidebar & login
+  const namaDisplay = s.emoji + ' ' + s.nama;
+  document.querySelectorAll('.sidebar-logo .name, .login-logo .logo-text').forEach(el => {
+    el.innerHTML = s.nama;
+  });
+  document.querySelectorAll('.sidebar-logo .icon, .login-logo .logo-icon').forEach(el => {
+    el.textContent = s.emoji;
+  });
+  // Update judul browser
+  document.title = s.nama + ' — Point of Sale';
+  // Store emoji untuk selectTheme UI
+  _currentAccent  = s.accentColor;
+  _currentAccent2 = s.accentColor2;
+  _currentEmoji   = s.emoji;
+}
+
+function resetProduk() {
+  konfirm('Hapus SEMUA data produk? Ini tidak dapat dibatalkan!', () => {
+    DB.remove('produk');
+    initData();
+    toast('Data produk direset ke default', 'error');
+  });
+}
+
+function resetTransaksi() {
+  konfirm('Hapus SEMUA riwayat transaksi?', () => {
+    DB.set('transaksi', []);
+    toast('Semua transaksi dihapus', 'error');
+  });
+}
+
+/* =============================================================
    ENTER KEY SHORTCUTS
 ============================================================= */
 document.addEventListener('keydown', e => {
@@ -1630,6 +2072,9 @@ document.addEventListener('keydown', e => {
    BOOT — Cek sesi yang tersimpan
 ============================================================= */
 initData();
+
+// Apply toko settings sejak awal (termasuk di login page)
+applyTokoSettings();
 
 const savedSession = getSession();
 if (savedSession) {
