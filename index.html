@@ -292,13 +292,7 @@
       padding:14px;font-family:var(--font-mono);font-size:11px;line-height:1.9;color:var(--muted);margin-top:16px;text-align:center}
     .struk-mini-preview .sp-name{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.05em}
 
-    /* LICENSE MANAGER */
-    .lic-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px}
-    .lic-key{font-family:var(--font-mono);font-size:11px;word-break:break-all;color:var(--muted);
-      background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-top:8px}
-    .lic-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
-      padding:3px 10px;border-radius:20px;background:rgba(61,220,132,.12);color:var(--green)}
-    .lic-status.expired{background:rgba(255,92,92,.12);color:var(--red)}
+
 
     /* SCROLLBAR */
     ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:transparent}
@@ -376,7 +370,6 @@
       <div class="nav-label">Admin</div>
       <div class="nav-item" onclick="showPage('users')"><span class="nav-icon">👥</span> Pengguna</div>
       <div class="nav-item" onclick="showPage('setting')"><span class="nav-icon">⚙️</span> Setting Toko</div>
-      <div class="nav-item" onclick="showPage('lisensi')"><span class="nav-icon">🔑</span> Lisensi</div>
     </div>
     <div class="sidebar-footer">
       <div class="user-chip">
@@ -394,7 +387,6 @@
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Dashboard</div>
       <div class="topbar-right">
-        <span class="badge" id="lic-badge">● AKTIF</span>
         <span id="topbar-clock" style="font-family:var(--font-mono);font-size:12px;color:var(--muted)"></span>
       </div>
     </div>
@@ -628,39 +620,6 @@
       </div>
     </div>
 
-    <!-- LISENSI MANAGER -->
-    <div class="page-body hidden" id="pg-lisensi">
-      <div class="page-header"><h2>🔑 Manajemen Lisensi</h2><button class="btn btn-primary" onclick="openModalGenLic()">+ Generate Lisensi</button></div>
-      <div class="lic-card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:700;font-size:14px;margin-bottom:4px">Lisensi Aktif</div>
-            <div id="lic-current-domain" style="font-size:13px;color:var(--muted)">—</div>
-          </div>
-          <div id="lic-current-status" class="lic-status">● AKTIF</div>
-        </div>
-        <div id="lic-current-key" class="lic-key">—</div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-ghost btn-sm" onclick="copyLicKey()">📋 Salin Key</button>
-          <button class="btn btn-danger btn-sm" onclick="revokeLicense()">🗑 Cabut Lisensi</button>
-        </div>
-      </div>
-      <div style="font-family:var(--font-head);font-weight:700;font-size:14px;margin-bottom:12px">Generator Lisensi Baru</div>
-      <div class="lic-card">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div class="form-group" style="margin:0"><label>Domain Target</label><input type="text" id="gen-domain" class="form-input" placeholder="contoh: tokosaya.com" /></div>
-          <div class="form-group" style="margin:0"><label>Berlaku Hingga</label><input type="date" id="gen-expiry" class="form-input" /></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:14px">
-          <button class="btn btn-primary" onclick="generateLicense()">⚡ Generate Key</button>
-        </div>
-        <div id="gen-result" class="hidden" style="margin-top:14px">
-          <div class="lic-key" id="gen-key-output" style="cursor:pointer" onclick="copyGenKey()"></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">Klik key di atas untuk menyalin. Bagikan ke pemilik domain tersebut.</div>
-        </div>
-      </div>
-    </div>
-
   </div><!-- end main-content -->
 </div><!-- end page-app -->
 
@@ -750,12 +709,6 @@ function _hmac(str) {
   return h.toString(36).padStart(8, '0');
 }
 
-function generateLicenseKey(domain, expiry) {
-  const payload = { domain: domain.toLowerCase().trim(), expiry, v: 1 };
-  const sig = _hmac(payload.domain + '|' + payload.expiry);
-  payload.sig = sig;
-  return btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-}
 
 function verifyLicenseKey(key) {
   try {
@@ -800,47 +753,6 @@ function activateLicense() {
   setTimeout(() => location.reload(), 1000);
 }
 
-function generateLicense() {
-  const domain = document.getElementById('gen-domain').value.trim();
-  const expiry = document.getElementById('gen-expiry').value || 'forever';
-  if (!domain) { toast('Masukkan domain target', 'error'); return; }
-  const key = generateLicenseKey(domain, expiry);
-  document.getElementById('gen-key-output').textContent = key;
-  document.getElementById('gen-result').classList.remove('hidden');
-  document.getElementById('gen-result').style.display = 'block';
-}
-
-function copyGenKey() {
-  const k = document.getElementById('gen-key-output').textContent;
-  navigator.clipboard.writeText(k).then(() => toast('Key tersalin! 📋', 'success'));
-}
-
-function copyLicKey() {
-  const stored = DB.get('license');
-  if (!stored) return;
-  navigator.clipboard.writeText(stored.key).then(() => toast('Key tersalin! 📋', 'success'));
-}
-
-function revokeLicense() {
-  konfirm('Cabut lisensi aktif? Aplikasi akan meminta aktivasi ulang.', () => {
-    DB.remove('license');
-    toast('Lisensi dicabut', 'error');
-    setTimeout(() => location.reload(), 800);
-  });
-}
-
-function renderLisensiPage() {
-  const stored = DB.get('license');
-  document.getElementById('lic-current-domain').textContent = stored ? stored.payload.domain + (stored.payload.expiry !== 'forever' ? ' — Berlaku s/d ' + stored.payload.expiry : ' — Selamanya') : 'Tidak ada lisensi aktif';
-  document.getElementById('lic-current-key').textContent = stored ? stored.key : '—';
-  const st = document.getElementById('lic-current-status');
-  const licOk = checkLicense();
-  st.textContent = licOk ? '● AKTIF' : '● TIDAK AKTIF';
-  st.className = 'lic-status' + (licOk ? '' : ' expired');
-  // Set default expiry 1 year
-  const d = new Date(); d.setFullYear(d.getFullYear() + 1);
-  document.getElementById('gen-expiry').value = d.toISOString().split('T')[0];
-}
 
 /* ============================================================
    STORAGE
@@ -954,7 +866,6 @@ const pageMap = {
   laporan:   { el:'pg-laporan',  title:'📈 Laporan & Analitik', onShow: renderLaporan },
   users:     { el:'pg-users',    title:'👥 Pengguna',           onShow: renderUsers },
   setting:   { el:'pg-setting',  title:'⚙️ Setting Toko',       onShow: renderSetting },
-  lisensi:   { el:'pg-lisensi',  title:'🔑 Manajemen Lisensi', onShow: renderLisensiPage },
 };
 
 function showPage(name) {
