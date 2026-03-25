@@ -168,7 +168,7 @@
       background:rgba(77,166,255,.12);color:var(--blue);display:inline-block}
 
     /* KASIR */
-    .kasir-layout{display:grid;grid-template-columns:1fr 360px;gap:20px;height:calc(100vh - 60px - 56px)}
+    .kasir-layout{display:grid;grid-template-columns:1fr 360px;gap:20px;height:calc(100vh - 60px - 32px);flex:1}
     .kasir-left{display:flex;flex-direction:column;gap:16px;overflow:hidden}
     .kasir-right{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
       display:flex;flex-direction:column;overflow:hidden}
@@ -411,7 +411,7 @@
     </div>
 
     <!-- KASIR -->
-    <div class="page-body hidden" id="pg-kasir" style="padding:16px">
+    <div class="page-body hidden" id="pg-kasir" style="padding:16px;overflow:hidden;display:flex;flex-direction:column">
       <div class="kasir-layout">
         <div class="kasir-left">
           <div class="kasir-search">
