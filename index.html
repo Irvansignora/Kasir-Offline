@@ -363,13 +363,37 @@ tr:hover td{background:rgba(255,255,255,.02)}
 @media(max-width:640px){
   /* ---- BOTTOM NAV SHELL ---- */
   .sidebar{
-    position:fixed;bottom:0;left:0;right:0;top:auto;
-    width:100%;height:64px;
-    flex-direction:row;align-items:stretch;
-    padding:0;border-right:none;border-top:1px solid var(--border);
-    z-index:300;overflow:hidden;gap:0;
-    background:var(--surface);
+    display: none !important;
   }
+  
+  .mobile-menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .mm-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 18px 10px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .mm-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+  .mm-text {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+  }
+
   /* hide desktop-only sidebar pieces */
   .sidebar-logo,.sidebar-footer,.nav-label{display:none!important}
 
@@ -416,7 +440,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   /* ---- MAIN CONTENT ---- */
   #page-app{flex-direction:column}
   .main-content{flex:1;min-width:0}
-  .page-body{padding:14px 12px;padding-bottom:82px;overflow-y:auto}
+  .page-body{padding:14px 12px;padding-bottom:14px;overflow-y:auto}
 
   /* ---- TOPBAR ---- */
   .topbar{padding:0 14px;height:52px}
@@ -488,8 +512,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 /* Safe area / notch support */
 @supports(padding-bottom:env(safe-area-inset-bottom)){
   @media(max-width:640px){
-    .sidebar{height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
-    .page-body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+    .page-body{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   }
 }
 @media(display-mode:standalone){
@@ -646,11 +669,32 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
     </div>
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div style="display:flex; align-items:center; gap: 12px;">
+        <button id="mobile-back-btn" class="hidden" onclick="showPage('mobile-menu')" style="background:none; border:none; color:var(--text); font-size:20px; cursor:pointer; padding:0; display:flex; align-items:center;">←</button>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
       <div class="topbar-right">
         <span id="topbar-clock" style="font-family:var(--font-mono);font-size:12px;color:var(--muted)"></span>
         <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
         <div id="topbar-avatar" style="width:28px;height:28px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0d0f14;cursor:pointer" title="Logout" onclick="doLogout()">A</div>
+      </div>
+    </div>
+
+    <!-- ========== MOBILE MENU ========== -->
+    <div class="page-body hidden" id="pg-mobile-menu" style="padding: 16px; align-content: flex-start; min-height: 100%;">
+      <div style="font-family: var(--font-head); font-weight: 800; font-size: 20px; margin-bottom: 20px;">Menu Utama</div>
+      <div class="mobile-menu-grid">
+        <div class="mm-card" onclick="showPage('kasir')"><div class="mm-icon">🛒</div><div class="mm-text">Kasir POS</div></div>
+        <div class="mm-card" onclick="showPage('produk')"><div class="mm-icon">📦</div><div class="mm-text">Kelola Produk</div></div>
+        <div class="mm-card" onclick="showPage('transaksi')"><div class="mm-icon">📝</div><div class="mm-text">Catat Transaksi</div></div>
+        <div class="mm-card" onclick="showPage('riwayat')"><div class="mm-icon">📋</div><div class="mm-text">Riwayat Transaksi</div></div>
+        <div class="mm-card" onclick="showPage('laporan-kasir')"><div class="mm-icon">📈</div><div class="mm-text">Laporan Kasir</div></div>
+        <div class="mm-card" onclick="showPage('laporan-buku')"><div class="mm-icon">📊</div><div class="mm-text">Laba / Rugi</div></div>
+        <div class="mm-card" onclick="showPage('stok')"><div class="mm-icon">📦</div><div class="mm-text">Stok Barang</div></div>
+        <div class="mm-card" onclick="showPage('hutang')"><div class="mm-icon">🤝</div><div class="mm-text">Hutang/Piutang</div></div>
+        <div class="mm-card" onclick="showPage('hpp')"><div class="mm-icon">🧮</div><div class="mm-text">Kalkulator HPP</div></div>
+        <div class="mm-card" onclick="showPage('users')"><div class="mm-icon">👥</div><div class="mm-text">Pengguna</div></div>
+        <div class="mm-card" onclick="showPage('setting')"><div class="mm-icon">⚙️</div><div class="mm-text">Setting</div></div>
       </div>
     </div>
 
@@ -1538,7 +1582,12 @@ function loadApp(user){
   if(user.role==='admin') document.getElementById('nav-admin').style.display='block';
   applyTokoSettings();
   startClock();
-  showPage('dashboard-kasir');
+  
+  if(window.innerWidth <= 640) {
+    showPage('mobile-menu');
+  } else {
+    showPage('dashboard-kasir');
+  }
 }
 
 /* ============================================================
@@ -1564,6 +1613,7 @@ let _chartLapOmset=null,_chartLapProduk=null;
 let _reportModeKasir='harian';
 
 const pageMap = {
+  'mobile-menu':    {el:'pg-mobile-menu',    title:'Menu Utama',        fn:null},
   'dashboard-kasir':{el:'pg-dashboard-kasir',title:'📊 Dashboard Kasir',fn:renderDashboardKasir},
   'kasir':          {el:'pg-kasir',          title:'🛒 Kasir',          fn:initKasir},
   'produk':         {el:'pg-produk',         title:'📦 Manajemen Produk',fn:renderProdukTable},
@@ -1588,6 +1638,16 @@ function showPage(name){
   document.querySelectorAll('.nav-item').forEach(el=>{
     if(el.getAttribute('onclick')===`showPage('${name}')`) el.classList.add('active');
   });
+
+  const backBtn = document.getElementById('mobile-back-btn');
+  if(backBtn) {
+    if(window.innerWidth <= 640 && name !== 'mobile-menu') {
+      backBtn.classList.remove('hidden');
+    } else {
+      backBtn.classList.add('hidden');
+    }
+  }
+
   if(page.fn) page.fn();
 }
 
