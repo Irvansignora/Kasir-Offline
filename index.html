@@ -342,39 +342,142 @@ tr:hover td{background:rgba(255,255,255,.02)}
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
-/* MOBILE */
+/* ============================================================
+   MOBILE RESPONSIVE
+============================================================ */
+
+/* Tablet */
 @media(max-width:900px){
   .sidebar{width:64px}
-  .sidebar-logo .name,.nav-item span:not(.nav-icon),.nav-label,.user-info,.app-mode-toggle span{display:none}
-  .nav-item{justify-content:center;padding:10px 0}
-  .app-mode-toggle{flex-direction:column}
-  .mode-btn{font-size:9px;padding:4px}
-  .hpp-layout{grid-template-columns:1fr}
+  .sidebar-logo .name,.nav-item span:not(.nav-icon),.nav-label,.user-info{display:none}
+  .nav-item{justify-content:center;padding:12px 0}
+  .app-mode-toggle{padding:4px 6px;gap:4px}
+  .mode-btn{font-size:0;padding:8px}
+  .mode-btn::first-letter{font-size:18px}
+  .hpp-layout,.chart-grid,.setting-grid,.lr-grid{grid-template-columns:1fr}
+}
+
+/* Mobile — bottom navigation bar */
+@media(max-width:640px){
+  /* ---- BOTTOM NAV SHELL ---- */
+  .sidebar{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100%;height:60px;
+    flex-direction:row;align-items:stretch;
+    padding:0;border-right:none;border-top:1px solid var(--border);
+    z-index:300;overflow:hidden;gap:0;
+    background:var(--surface);
+  }
+  /* hide desktop-only sidebar pieces */
+  .sidebar-logo,.sidebar-footer,.nav-label{display:none!important}
+  /* mode toggle becomes two small tabs inside bottom nav */
+  .app-mode-toggle{
+    display:flex;flex-direction:row;align-items:center;
+    background:transparent;border:none;border-right:1px solid var(--border);
+    border-radius:0;padding:4px 2px;gap:2px;flex-shrink:0;width:auto;margin:0
+  }
+  .mode-btn{
+    flex:none;padding:6px 8px;border-radius:6px;
+    font-size:18px;line-height:1;
+    display:flex;align-items:center;justify-content:center;width:36px;height:36px
+  }
+  /* nav groups = scrollable row */
+  #nav-kasir,#nav-buku{display:contents}
+  .nav-group{
+    display:flex;flex-direction:row;align-items:stretch;flex:1;overflow-x:auto;gap:0;
+    scrollbar-width:none;-ms-overflow-style:none
+  }
+  .nav-group::-webkit-scrollbar{display:none}
+  .nav-item{
+    flex-direction:column;flex:1;min-width:52px;max-width:72px;
+    padding:6px 2px 4px;gap:2px;border-radius:0;margin:0;
+    font-size:9px;font-weight:600;letter-spacing:.02em;
+    justify-content:center;align-items:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .nav-item span:not(.nav-icon){display:block!important;font-size:9px;line-height:1.2;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis}
+  .nav-item .nav-icon{font-size:20px;display:block}
+  .nav-item.active{background:rgba(245,200,66,.12);border-top:2px solid var(--accent)}
+
+  /* ---- MAIN CONTENT ---- */
+  #page-app{flex-direction:column}
+  .main-content{flex:1;min-width:0}
+  .page-body{padding:14px 12px;padding-bottom:76px;overflow-y:auto}
+
+  /* ---- TOPBAR ---- */
+  .topbar{padding:0 14px;height:52px}
+  .topbar-title{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+  #topbar-clock{display:none}
+  .trial-topbar{font-size:11px;padding:5px 14px}
+
+  /* ---- TABLES: horizontal scroll ---- */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:520px}
+
+  /* ---- STATS GRID ---- */
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat-card{padding:14px 14px}
+  .stat-value{font-size:20px}
+  .stat-icon{font-size:22px}
+
+  /* ---- CHARTS ---- */
   .chart-grid{grid-template-columns:1fr}
-  .setting-grid{grid-template-columns:1fr}
-  .lr-grid{grid-template-columns:1fr}
+  .chart-wrap{padding:14px}
+
+  /* ---- PAGE HEADER ---- */
+  .page-header{margin-bottom:14px}
+  .page-header h2{font-size:16px}
+
+  /* ---- KASIR LAYOUT ---- */
+  #pg-kasir{height:auto!important;overflow-y:auto!important;padding-bottom:76px!important}
+  .kasir-layout{grid-template-columns:1fr!important;height:auto;display:flex;flex-direction:column;gap:12px}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
+  .kasir-right{border-radius:12px;max-height:none}
+
+  /* ---- MODALS ---- */
+  .modal-overlay{align-items:flex-end}
+  .modal{margin:0;max-width:100%;border-radius:20px 20px 0 0;max-height:92vh;padding:20px 18px}
+
+  /* ---- FORMS ---- */
+  .search-bar input{width:100%}
+  .filter-row{flex-wrap:wrap;gap:8px}
+  .filter-row input,.filter-row select{flex:1;min-width:120px}
+
+  /* ---- HPP / SETTINGS ---- */
+  .hpp-layout,.setting-grid,.lr-grid{grid-template-columns:1fr}
+  .bahan-row{flex-wrap:wrap}
+  .bahan-row input{flex:1 1 80px}
+  .rekomendasi-grid{grid-template-columns:1fr 1fr}
+
+  /* ---- REPORT TABS ---- */
+  .report-tabs{flex-wrap:wrap;gap:6px}
+
+  /* ---- LOGIN ---- */
+  .login-box{padding:32px 22px;margin:16px}
+
+  /* ---- PWA BANNER ---- */
+  #pwa-install-banner{bottom:calc(60px + env(safe-area-inset-bottom) + 8px);left:12px;right:12px;max-width:none}
+
+  /* ---- LICENSE WALL ---- */
+  .license-box{margin:16px;border-radius:16px;padding:28px 20px}
 }
-@media(max-width:600px){
-  .sidebar{position:fixed;bottom:0;left:0;right:0;width:100%;height:auto;flex-direction:row;
-    padding:0;top:auto;border-right:none;border-top:1px solid var(--border);z-index:200;overflow-x:auto}
-  .nav-group{display:flex;flex:1}.nav-item{flex-direction:column;flex:1;padding:8px 4px;font-size:8px;min-width:44px;gap:2px;border-radius:0}
-  .nav-item .nav-icon{font-size:20px}
-  .sidebar-logo,.sidebar-footer,.app-mode-toggle{display:none}
-  .page-body{padding:14px;padding-bottom:80px}
-  .kasir-layout{grid-template-columns:1fr;height:auto;display:flex;flex-direction:column}
-  .kasir-right{flex-shrink:0;max-height:50vh;border-radius:16px 16px 0 0;border-left:none;border-right:none;border-bottom:none;box-shadow:0 -8px 32px rgba(0,0,0,.4)}
-  .product-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
-  .modal{padding:22px 18px;margin:16px;max-width:calc(100vw - 32px)}
-  .hpp-layout{grid-template-columns:1fr}
-  #pwa-install-banner{bottom:calc(58px + env(safe-area-inset-bottom) + 12px)}
-}
+
+/* Extra small */
 @media(max-width:380px){
   .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .stat-value{font-size:20px}
+  .nav-item{min-width:44px;font-size:8px}
+  .topbar-title{max-width:120px}
+}
+
+/* Safe area / notch support */
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  @media(max-width:640px){
+    .sidebar{height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
+    .page-body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  }
 }
 @media(display-mode:standalone){
-  .sidebar{padding-bottom:env(safe-area-inset-bottom)}
-  .topbar{padding-top:env(safe-area-inset-top);height:calc(60px + env(safe-area-inset-top))}
+  .topbar{padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top))}
 }
 </style>
 </head>
@@ -389,12 +492,72 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="logo-icon">🏪</div>
       <div class="logo-text">UMKM<span>ku</span></div>
     </div>
-    <h2>Selamat Datang</h2>
-    <p class="sub">Kasir & Pembukuan dalam satu aplikasi</p>
-    <div class="form-group"><label>Username</label><input type="text" id="login-username" class="form-input" placeholder="admin" autocomplete="username"/></div>
-    <div class="form-group"><label>Password</label><input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password"/></div>
-    <button class="btn btn-primary w-full" style="margin-top:8px" onclick="doLogin()">Masuk →</button>
-    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">Sistem Offline — Data tersimpan di perangkat Anda</div>
+
+    <!-- AUTH TABS -->
+    <div style="display:flex;gap:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;margin-bottom:24px">
+      <button id="tab-login-btn" onclick="switchAuthTab('login')"
+        style="flex:1;padding:8px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#0d0f14;font-family:var(--font-body);transition:all .15s">
+        Masuk
+      </button>
+      <button id="tab-register-btn" onclick="switchAuthTab('register')"
+        style="flex:1;padding:8px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);transition:all .15s">
+        Daftar
+      </button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <h2 style="font-family:var(--font-head);font-size:20px;font-weight:800;margin-bottom:4px">Selamat Datang 👋</h2>
+      <p class="sub" style="margin-bottom:20px">Masuk ke akun UMKMku Anda</p>
+      <div class="form-group"><label>Username</label><input type="text" id="login-username" class="form-input" placeholder="Masukkan username" autocomplete="username"/></div>
+      <div class="form-group"><label>Password</label>
+        <div style="position:relative">
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password" style="padding-right:42px"/>
+          <button onclick="togglePassVis('login-password','eye-login')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)" id="eye-login">👁</button>
+        </div>
+      </div>
+      <button class="btn btn-primary w-full" style="margin-top:10px" onclick="doLogin()">Masuk →</button>
+      <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)">
+        🔒 Sistem Offline — Data tersimpan di perangkat Anda
+      </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="form-register" class="hidden">
+      <h2 style="font-family:var(--font-head);font-size:20px;font-weight:800;margin-bottom:4px">Buat Akun Baru ✨</h2>
+      <p class="sub" style="margin-bottom:20px">Daftar untuk mulai menggunakan UMKMku</p>
+      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg-nama" class="form-input" placeholder="Cth: Budi Santoso"/></div>
+      <div class="form-group"><label>Username</label><input type="text" id="reg-username" class="form-input" placeholder="Cth: budi123" autocomplete="username" oninput="checkUsernameAvail()"/>
+        <div id="reg-username-status" style="font-size:11px;margin-top:4px;min-height:16px"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label>Password</label>
+          <div style="position:relative">
+            <input type="password" id="reg-password" class="form-input" placeholder="Min. 6 karakter" style="padding-right:38px" oninput="checkPassStrength()"/>
+            <button onclick="togglePassVis('reg-password','eye-reg')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted)" id="eye-reg">👁</button>
+          </div>
+        </div>
+        <div class="form-group"><label>Konfirmasi</label>
+          <input type="password" id="reg-confirm" class="form-input" placeholder="Ulangi password"/>
+        </div>
+      </div>
+      <div id="pass-strength-bar" style="height:4px;border-radius:2px;background:var(--border);margin:-8px 0 12px;overflow:hidden">
+        <div id="pass-strength-fill" style="height:100%;width:0%;border-radius:2px;transition:all .3s"></div>
+      </div>
+      <div class="form-group"><label>Role</label>
+        <select id="reg-role" class="form-input">
+          <option value="kasir">Kasir</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div style="background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--blue);margin-bottom:14px">
+        💡 <b>Admin</b> bisa kelola pengguna & setting toko. <b>Kasir</b> hanya bisa transaksi & produk.
+      </div>
+      <button class="btn btn-primary w-full" onclick="doRegister()">Buat Akun & Masuk →</button>
+      <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">
+        Sudah punya akun? <a onclick="switchAuthTab('login')" style="color:var(--accent);cursor:pointer;font-weight:600">Masuk di sini</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2487,12 +2650,93 @@ function downloadCSV(rows, filename){
 }
 
 /* ============================================================
+   REGISTER & AUTH UI
+============================================================ */
+function switchAuthTab(tab){
+  const isLogin = tab==='login';
+  document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+  document.getElementById('form-register').classList.toggle('hidden', isLogin);
+  const loginBtn = document.getElementById('tab-login-btn');
+  const regBtn   = document.getElementById('tab-register-btn');
+  loginBtn.style.background  = isLogin ? 'var(--accent)' : 'transparent';
+  loginBtn.style.color       = isLogin ? '#0d0f14' : 'var(--muted)';
+  regBtn.style.background    = !isLogin ? 'var(--accent)' : 'transparent';
+  regBtn.style.color         = !isLogin ? '#0d0f14' : 'var(--muted)';
+}
+
+function togglePassVis(inputId, btnId){
+  const inp = document.getElementById(inputId);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  document.getElementById(btnId).textContent = show ? '🙈' : '👁';
+}
+
+function checkUsernameAvail(){
+  const val = document.getElementById('reg-username').value.trim();
+  const el  = document.getElementById('reg-username-status');
+  if(!val){ el.textContent=''; return; }
+  if(val.length < 3){ el.style.color='var(--red)'; el.textContent='⚠ Minimal 3 karakter'; return; }
+  if(!/^[a-zA-Z0-9_]+$/.test(val)){ el.style.color='var(--red)'; el.textContent='⚠ Hanya huruf, angka, dan _'; return; }
+  const users = DB.get('users')||[];
+  const taken = users.some(u=>u.username.toLowerCase()===val.toLowerCase());
+  el.style.color = taken ? 'var(--red)' : 'var(--green)';
+  el.textContent  = taken ? '✗ Username sudah digunakan' : '✓ Username tersedia';
+}
+
+function checkPassStrength(){
+  const p = document.getElementById('reg-password').value;
+  const fill = document.getElementById('pass-strength-fill');
+  let score = 0;
+  if(p.length >= 6) score++;
+  if(p.length >= 10) score++;
+  if(/[A-Z]/.test(p) && /[a-z]/.test(p)) score++;
+  if(/[0-9]/.test(p)) score++;
+  if(/[^A-Za-z0-9]/.test(p)) score++;
+  const pct = (score/5)*100;
+  const colors = ['var(--red)','var(--red)','var(--orange)','var(--accent)','var(--green)'];
+  fill.style.width = pct+'%';
+  fill.style.background = colors[Math.min(score,4)];
+}
+
+function doRegister(){
+  const nama     = document.getElementById('reg-nama').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+  const role     = document.getElementById('reg-role').value;
+
+  if(!nama)     { toast('Nama lengkap wajib diisi','error'); return; }
+  if(!username) { toast('Username wajib diisi','error'); return; }
+  if(username.length < 3){ toast('Username minimal 3 karakter','error'); return; }
+  if(!/^[a-zA-Z0-9_]+$/.test(username)){ toast('Username hanya boleh huruf, angka, dan _','error'); return; }
+  if(!password) { toast('Password wajib diisi','error'); return; }
+  if(password.length < 6){ toast('Password minimal 6 karakter','error'); return; }
+  if(password !== confirm){ toast('Konfirmasi password tidak cocok','error'); return; }
+
+  const users = DB.get('users')||[];
+  if(users.some(u=>u.username.toLowerCase()===username.toLowerCase())){
+    toast('Username sudah digunakan, pilih username lain','error'); return;
+  }
+
+  const newUser = { id: Date.now(), nama, username, password: hashPass(password), role };
+  users.push(newUser);
+  DB.set('users', users);
+  toast('✅ Akun berhasil dibuat! Selamat datang, '+nama+'!','success');
+
+  // Auto login after register
+  setSession(newUser);
+  loadApp(newUser);
+  if(!checkLicenseOnBoot()) showLicenseWall(true);
+}
+
+/* ============================================================
    KEYBOARD SHORTCUTS
 ============================================================ */
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     const id=document.activeElement?.id;
     if(id==='login-username'||id==='login-password') doLogin();
+    if(id==='reg-nama'||id==='reg-username'||id==='reg-password'||id==='reg-confirm') doRegister();
   }
   if(e.key==='Escape') ['modal-produk','modal-user','modal-struk','modal-konfirm','modal-trx','modal-stok','modal-hutang'].forEach(m=>closeModal(m));
 });
