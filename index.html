@@ -62,9 +62,11 @@ body.light-mode input,body.light-mode select,body.light-mode textarea{color:var(
   display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 /* Trial status bar */
 .trial-topbar{background:rgba(245,200,66,.10);border-bottom:1px solid rgba(245,200,66,.2);
-  padding:6px 28px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--accent)}
+  padding:6px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--accent);gap:8px}
 .trial-topbar.warning{background:rgba(255,92,92,.08);border-color:rgba(255,92,92,.2);color:var(--red)}
-.trial-topbar a{font-weight:700;text-decoration:underline;cursor:pointer;color:inherit}
+.trial-topbar a{font-weight:700;text-decoration:underline;cursor:pointer;color:inherit;white-space:nowrap}
+.trial-topbar-close{background:none;border:none;cursor:pointer;font-size:15px;opacity:.6;color:inherit;padding:0;line-height:1;flex-shrink:0}
+.trial-topbar-close:hover{opacity:1}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;min-height:100vh;overflow-x:hidden}
@@ -362,7 +364,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   /* ---- BOTTOM NAV SHELL ---- */
   .sidebar{
     position:fixed;bottom:0;left:0;right:0;top:auto;
-    width:100%;height:60px;
+    width:100%;height:64px;
     flex-direction:row;align-items:stretch;
     padding:0;border-right:none;border-top:1px solid var(--border);
     z-index:300;overflow:hidden;gap:0;
@@ -370,17 +372,24 @@ tr:hover td{background:rgba(255,255,255,.02)}
   }
   /* hide desktop-only sidebar pieces */
   .sidebar-logo,.sidebar-footer,.nav-label{display:none!important}
-  /* mode toggle becomes two small tabs inside bottom nav */
+
+  /* Mode toggle — compact icon-only pill on the left */
   .app-mode-toggle{
-    display:flex;flex-direction:row;align-items:center;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:transparent;border:none;border-right:1px solid var(--border);
-    border-radius:0;padding:4px 2px;gap:2px;flex-shrink:0;width:auto;margin:0
+    border-radius:0;padding:4px 6px;gap:3px;flex-shrink:0;width:52px;margin:0
   }
   .mode-btn{
-    flex:none;padding:6px 8px;border-radius:6px;
-    font-size:18px;line-height:1;
-    display:flex;align-items:center;justify-content:center;width:36px;height:36px
+    flex:none;padding:0;border-radius:8px;
+    font-size:20px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    width:36px;height:26px;color:var(--muted);transition:all .15s
   }
+  .mode-btn.active{
+    background:rgba(245,200,66,.15);color:var(--accent);
+    border-radius:8px
+  }
+
   /* nav groups = scrollable row */
   #nav-kasir,#nav-buku{display:contents}
   .nav-group{
@@ -389,26 +398,31 @@ tr:hover td{background:rgba(255,255,255,.02)}
   }
   .nav-group::-webkit-scrollbar{display:none}
   .nav-item{
-    flex-direction:column;flex:1;min-width:52px;max-width:72px;
-    padding:6px 2px 4px;gap:2px;border-radius:0;margin:0;
-    font-size:9px;font-weight:600;letter-spacing:.02em;
+    flex-direction:column;flex:1;min-width:56px;max-width:80px;
+    padding:6px 4px 4px;gap:3px;border-radius:0;margin:0;
+    font-size:10px;font-weight:600;letter-spacing:.01em;
     justify-content:center;align-items:center;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    white-space:nowrap;overflow:hidden
   }
-  .nav-item span:not(.nav-icon){display:block!important;font-size:9px;line-height:1.2;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis}
-  .nav-item .nav-icon{font-size:20px;display:block}
-  .nav-item.active{background:rgba(245,200,66,.12);border-top:2px solid var(--accent)}
+  .nav-item span:not(.nav-icon){
+    display:block!important;font-size:10px;line-height:1.2;
+    text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;
+    color:var(--muted)
+  }
+  .nav-item .nav-icon{font-size:22px;display:block;line-height:1}
+  .nav-item.active{background:rgba(245,200,66,.10);border-top:2px solid var(--accent)}
+  .nav-item.active span:not(.nav-icon){color:var(--accent)}
 
   /* ---- MAIN CONTENT ---- */
   #page-app{flex-direction:column}
   .main-content{flex:1;min-width:0}
-  .page-body{padding:14px 12px;padding-bottom:76px;overflow-y:auto}
+  .page-body{padding:14px 12px;padding-bottom:82px;overflow-y:auto}
 
   /* ---- TOPBAR ---- */
   .topbar{padding:0 14px;height:52px}
   .topbar-title{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
   #topbar-clock{display:none}
-  .trial-topbar{font-size:11px;padding:5px 14px}
+  .trial-topbar{font-size:11px;padding:5px 12px}
 
   /* ---- TABLES: horizontal scroll ---- */
   .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -429,7 +443,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   .page-header h2{font-size:16px}
 
   /* ---- KASIR LAYOUT ---- */
-  #pg-kasir{height:auto!important;overflow-y:auto!important;padding-bottom:76px!important}
+  #pg-kasir{height:auto!important;overflow-y:auto!important;padding-bottom:82px!important}
   .kasir-layout{grid-template-columns:1fr!important;height:auto;display:flex;flex-direction:column;gap:12px}
   .product-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
   .kasir-right{border-radius:12px;max-height:none}
@@ -456,7 +470,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   .login-box{padding:32px 22px;margin:16px}
 
   /* ---- PWA BANNER ---- */
-  #pwa-install-banner{bottom:calc(60px + env(safe-area-inset-bottom) + 8px);left:12px;right:12px;max-width:none}
+  #pwa-install-banner{bottom:calc(72px + env(safe-area-inset-bottom) + 8px);left:12px;right:12px;max-width:none}
 
   /* ---- LICENSE WALL ---- */
   .license-box{margin:16px;border-radius:16px;padding:28px 20px}
@@ -465,15 +479,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
 /* Extra small */
 @media(max-width:380px){
   .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .nav-item{min-width:44px;font-size:8px}
+  .nav-item{min-width:48px;font-size:9px}
+  .nav-item .nav-icon{font-size:19px}
   .topbar-title{max-width:120px}
+  .app-mode-toggle{width:46px}
 }
 
 /* Safe area / notch support */
 @supports(padding-bottom:env(safe-area-inset-bottom)){
   @media(max-width:640px){
-    .sidebar{height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
-    .page-body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+    .sidebar{height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
+    .page-body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
   }
 }
 @media(display-mode:standalone){
@@ -624,7 +640,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <!-- Trial status bar -->
     <div class="trial-topbar hidden" id="trial-bar">
       <span id="trial-bar-msg">⏳ Trial aktif</span>
-      <a onclick="showLicenseWall(false)">Aktifkan Lisensi →</a>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <a onclick="showLicenseWall(false)">Aktifkan Lisensi →</a>
+        <button class="trial-topbar-close" onclick="document.getElementById('trial-bar').classList.add('hidden')" title="Tutup">✕</button>
+      </div>
     </div>
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Dashboard</div>
