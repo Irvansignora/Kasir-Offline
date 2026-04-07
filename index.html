@@ -2069,10 +2069,10 @@ applyTokoSettings();
 const domain = getCurrentDomain();
 document.getElementById('lic-domain-display').textContent = domain;
 
-// Dev/localhost mode: skip license
-const isDevMode = domain === 'localhost' || domain === '127.0.0.1' || domain === '';
+// Demo mode: license disabled
+const isDevMode = true; // license check bypassed for demo
 
-if (!isDevMode && !checkLicense()) {
+if (false) {
   document.getElementById('page-license').classList.remove('hidden');
 } else {
   const savedSession = getSession();
