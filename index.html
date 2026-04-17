@@ -1261,7 +1261,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <button class="btn btn-primary w-full" onclick="activateLicense()" style="margin-top:4px">✅ Aktifkan Lisensi</button>
 
     <div style="margin-top:20px;font-size:11px;color:var(--muted)">
-      Butuh bantuan? <a href="https://wa.me/6285776077292" style="color:var(--accent);text-decoration:underline" onclick="openWhatsApp()">Chat via WhatsApp</a>
+      Butuh bantuan? <a href="#" style="color:var(--accent);text-decoration:underline" onclick="openWhatsApp()">Chat via WhatsApp</a>
     </div>
   </div>
 </div>
@@ -1504,7 +1504,8 @@ function copyDeviceId(){
 
 function openWhatsApp(){
   const id = getDeviceId();
-  window.open('https://wa.me/?text=Halo,%20saya%20ingin%20membeli%20lisensi%20UMKMku.%20Device%20ID%20saya:%20'+encodeURIComponent(id));
+  const nomor = '6285776077292';
+  window.open('https://wa.me/' + nomor + '?text=' + encodeURIComponent('Halo, saya ingin membeli lisensi UMKMku. Device ID saya: ' + id));
 }
 </script>
 
