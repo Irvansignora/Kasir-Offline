@@ -825,10 +825,19 @@ body.is-admin .admin-only { display: flex !important; }
           <button class="btn btn-danger" onclick="clearAllTransaksiKasir()">🗑 Hapus Semua</button>
         </div>
       </div>
-      <div class="filter-row">
-        <input type="date" id="filter-tgl-dari" onchange="renderRiwayat()"/>
-        <input type="date" id="filter-tgl-sampai" onchange="renderRiwayat()"/>
-        <button class="btn btn-ghost btn-sm" onclick="clearRiwayatFilter()">Reset Filter</button>
+      <div class="report-tabs" id="riwayat-period-tabs">
+        <div class="report-tab active" onclick="setRiwayatPeriod('harian',this)">📅 Hari Ini</div>
+        <div class="report-tab" onclick="setRiwayatPeriod('mingguan',this)">📅 Minggu Ini</div>
+        <div class="report-tab" onclick="setRiwayatPeriod('bulanan',this)">📅 Bulan Ini</div>
+        <div class="report-tab" onclick="setRiwayatPeriod('semua',this)">🗂 Semua</div>
+        <div class="report-tab" onclick="setRiwayatPeriod('custom',this)">✏️ Custom</div>
+      </div>
+      <div id="riwayat-custom-range" class="filter-row" style="display:none;margin-bottom:12px">
+        <input type="date" id="filter-tgl-dari"/>
+        <input type="date" id="filter-tgl-sampai"/>
+        <button class="btn btn-ghost btn-sm" onclick="clearRiwayatFilter()">Reset</button>
+      </div>
+      <div style="margin-bottom:14px">
         <span id="riwayat-summary" style="font-size:12px;color:var(--muted)"></span>
       </div>
       <div id="riwayat-list"></div>
@@ -975,13 +984,22 @@ body.is-admin .admin-only { display: flex !important; }
           <button class="btn btn-primary" onclick="openModalTrx()">+ Tambah</button>
         </div>
       </div>
+      <div class="report-tabs" id="trx-period-tabs">
+        <div class="report-tab active" onclick="setTrxPeriod('harian',this)">📅 Hari Ini</div>
+        <div class="report-tab" onclick="setTrxPeriod('mingguan',this)">📅 Minggu Ini</div>
+        <div class="report-tab" onclick="setTrxPeriod('bulanan',this)">📅 Bulan Ini</div>
+        <div class="report-tab" onclick="setTrxPeriod('semua',this)">🗂 Semua</div>
+        <div class="report-tab" onclick="setTrxPeriod('custom',this)">✏️ Custom</div>
+      </div>
+      <div id="trx-custom-range" class="filter-row" style="display:none;margin-bottom:4px">
+        <input type="date" id="filter-dari" onchange="renderTrxTable()"/>
+        <input type="date" id="filter-sampai" onchange="renderTrxTable()"/>
+      </div>
       <div class="filter-row">
         <select id="filter-jenis" class="form-input" style="width:auto" onchange="renderTrxTable()">
           <option value="">Semua Jenis</option><option value="masuk">Pemasukan</option><option value="keluar">Pengeluaran</option>
         </select>
         <select id="filter-kat" style="width:auto" onchange="renderTrxTable()"><option value="">Semua Kategori</option></select>
-        <input type="date" id="filter-dari" onchange="renderTrxTable()"/>
-        <input type="date" id="filter-sampai" onchange="renderTrxTable()"/>
         <button class="btn btn-ghost btn-sm" onclick="resetFilterTrx()">Reset</button>
         <span id="trx-summary" style="font-size:12px;color:var(--muted)"></span>
       </div>
@@ -997,7 +1015,13 @@ body.is-admin .admin-only { display: flex !important; }
         <h2>📈 Laporan Laba Rugi</h2>
         <button class="btn btn-ghost" onclick="exportLaporanCSV()">⬇️ Export PDF/CSV</button>
       </div>
-      <div class="filter-row" style="margin-bottom:24px">
+      <div class="report-tabs" id="lapbuku-period-tabs">
+        <div class="report-tab" onclick="setLapBukuPeriod('harian',this)">📅 Hari Ini</div>
+        <div class="report-tab" onclick="setLapBukuPeriod('mingguan',this)">📅 Minggu Ini</div>
+        <div class="report-tab active" onclick="setLapBukuPeriod('bulanan',this)">📅 Bulan Ini</div>
+        <div class="report-tab" onclick="setLapBukuPeriod('semua',this)">🗂 Semua</div>
+      </div>
+      <div class="filter-row" id="lapbuku-bulan-filter" style="margin-bottom:24px">
         <select id="lr-bulan" class="form-input" style="width:auto" onchange="renderLaporanBuku()">
           <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
           <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
@@ -1757,18 +1781,46 @@ const pageMap = {
   'dashboard-kasir':{el:'pg-dashboard-kasir',title:'📊 Dashboard Bisnis',fn:renderDashboardKasir},
   'kasir':          {el:'pg-kasir',          title:'🛒 POS Kasir',      fn:initKasir},
   'produk':         {el:'pg-produk',         title:'📦 Produk & Inventory',  fn:renderProdukTable},
-  'riwayat':        {el:'pg-riwayat',        title:'📋 Riwayat Transaksi',fn:renderRiwayat},
+  'riwayat':        {el:'pg-riwayat',        title:'📋 Riwayat Transaksi',fn:initRiwayatPage},
   'laporan-kasir':  {el:'pg-laporan-kasir',  title:'📈 Laporan Kasir',  fn:renderLaporanKasir},
   'users':          {el:'pg-users',          title:'👥 Pengelola (User)',fn:renderUsers},
   'setting':        {el:'pg-setting',        title:'⚙️ Konfigurasi Toko',fn:renderSetting},
   'dashboard-buku': {el:'pg-dashboard-buku', title:'📉 Dashboard Keuangan',fn:renderDashboardBuku},
-  'transaksi':      {el:'pg-transaksi',      title:'💸 Arus Kas',       fn:renderTrxTable},
-  'laporan-buku':   {el:'pg-laporan-buku',   title:'📈 Laporan L/R',    fn:renderLaporanBuku},
+  'transaksi':      {el:'pg-transaksi',      title:'💸 Arus Kas',       fn:initTrxPage},
+  'laporan-buku':   {el:'pg-laporan-buku',   title:'📈 Laporan L/R',    fn:initLapBukuPage},
   'hpp':            {el:'pg-hpp',            title:'🧮 Kalkulator HPP', fn:initHPP},
   'hutang':         {el:'pg-hutang',         title:'🤝 Hutang & Piutang',fn:renderHutang},
   'pelanggan':      {el:'pg-pelanggan',      title:'👥 Data Pelanggan', fn:renderPelanggan},
   'tagihan':        {el:'pg-tagihan',        title:'🧾 Buat Tagihan',   fn:renderTagihan},
 };
+
+// Page init wrappers — sync period tab UI & filter state on open
+function initRiwayatPage(){
+  const tabs = document.querySelectorAll('#riwayat-period-tabs .report-tab');
+  const modes = ['harian','mingguan','bulanan','semua','custom'];
+  tabs.forEach((b,i)=>b.classList.toggle('active', modes[i]===_riwayatPeriod));
+  document.getElementById('riwayat-custom-range').style.display = _riwayatPeriod==='custom'?'flex':'none';
+  renderRiwayat();
+}
+function initTrxPage(){
+  const tabs = document.querySelectorAll('#trx-period-tabs .report-tab');
+  const modes = ['harian','mingguan','bulanan','semua','custom'];
+  tabs.forEach((b,i)=>b.classList.toggle('active', modes[i]===_trxPeriod));
+  document.getElementById('trx-custom-range').style.display = _trxPeriod==='custom'?'flex':'none';
+  const range = getTrxDateRange(_trxPeriod);
+  if(_trxPeriod !== 'custom'){
+    document.getElementById('filter-dari').value = range.dari || '';
+    document.getElementById('filter-sampai').value = range.sampai || '';
+  }
+  renderTrxTable();
+}
+function initLapBukuPage(){
+  const tabs = document.querySelectorAll('#lapbuku-period-tabs .report-tab');
+  const modes = ['harian','mingguan','bulanan','semua'];
+  tabs.forEach((b,i)=>b.classList.toggle('active', modes[i]===_lapBukuPeriod));
+  document.getElementById('lapbuku-bulan-filter').style.display = _lapBukuPeriod==='bulanan'?'flex':'none';
+  renderLaporanBuku();
+}
 
 function showPage(name){
   // Role-based access guard
@@ -2424,16 +2476,64 @@ function importDatabase(input){
 /* ============================================================
    RIWAYAT KASIR
 ============================================================ */
+/* ============================================================
+   RIWAYAT KASIR
+============================================================ */
+let _riwayatPeriod = 'harian';
+
+function setRiwayatPeriod(mode, el){
+  _riwayatPeriod = mode;
+  document.querySelectorAll('#riwayat-period-tabs .report-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const customRange = document.getElementById('riwayat-custom-range');
+  customRange.style.display = mode === 'custom' ? 'flex' : 'none';
+  if(mode !== 'custom'){
+    const {dari, sampai} = getRiwayatDateRange(mode);
+    const elDari = document.getElementById('filter-tgl-dari');
+    const elSampai = document.getElementById('filter-tgl-sampai');
+    if(elDari) elDari.value = dari || '';
+    if(elSampai) elSampai.value = sampai || '';
+  }
+  renderRiwayat();
+}
+
+function getRiwayatDateRange(mode){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  if(mode === 'harian'){
+    const today = fmt(now);
+    return {dari: today, sampai: today};
+  }
+  if(mode === 'mingguan'){
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay() + (now.getDay()===0?-6:1));
+    return {dari: fmt(start), sampai: fmt(now)};
+  }
+  if(mode === 'bulanan'){
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {dari: fmt(start), sampai: fmt(now)};
+  }
+  return {dari: '', sampai: ''}; // semua
+}
+
 function renderRiwayat(){
   let transaksi=[...(DB.get('transaksi_kasir')||[])].reverse();
-  const dari=document.getElementById('filter-tgl-dari')?.value;
-  const sampai=document.getElementById('filter-tgl-sampai')?.value;
+  let dari, sampai;
+  if(_riwayatPeriod === 'custom'){
+    dari = document.getElementById('filter-tgl-dari')?.value;
+    sampai = document.getElementById('filter-tgl-sampai')?.value;
+  } else {
+    const range = getRiwayatDateRange(_riwayatPeriod);
+    dari = range.dari; sampai = range.sampai;
+  }
   if(dari) transaksi=transaksi.filter(t=>new Date(t.waktu)>=new Date(dari));
   if(sampai) transaksi=transaksi.filter(t=>new Date(t.waktu)<=new Date(sampai+'T23:59:59'));
   const el=document.getElementById('riwayat-list');
   const omset=transaksi.reduce((s,t)=>s+t.total,0);
-  document.getElementById('riwayat-summary').textContent=`${transaksi.length} transaksi — Total: ${rp(omset)}`;
-  if(!transaksi.length){ el.innerHTML=`<div class="empty-state" style="padding:80px 0"><div class="icon">📋</div><div>Belum ada transaksi</div></div>`; return; }
+  const laba=transaksi.reduce((s,t)=>s+t.items.reduce((ss,i)=>ss+(i.harga-(i.modal||0))*i.qty,0),0);
+  const periodLabel = _riwayatPeriod==='harian'?'Hari Ini':_riwayatPeriod==='mingguan'?'Minggu Ini':_riwayatPeriod==='bulanan'?'Bulan Ini':_riwayatPeriod==='semua'?'Semua Data':'Custom';
+  document.getElementById('riwayat-summary').textContent=`${periodLabel} — ${transaksi.length} transaksi | Omset: ${rp(omset)} | Laba: ${rp(laba)}`;
+  if(!transaksi.length){ el.innerHTML=`<div class="empty-state" style="padding:80px 0"><div class="icon">📋</div><div>Belum ada transaksi di periode ini</div></div>`; return; }
   el.innerHTML=transaksi.map(t=>`
     <div class="history-card">
       <div class="history-head">
@@ -2742,12 +2842,55 @@ function renderDashboardBuku(){
 /* ============================================================
    TRANSAKSI BUKU
 ============================================================ */
+let _trxPeriod = 'harian';
+
+function setTrxPeriod(mode, el){
+  _trxPeriod = mode;
+  document.querySelectorAll('#trx-period-tabs .report-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const customRange = document.getElementById('trx-custom-range');
+  customRange.style.display = mode === 'custom' ? 'flex' : 'none';
+  if(mode !== 'custom'){
+    const {dari, sampai} = getTrxDateRange(mode);
+    const elDari = document.getElementById('filter-dari');
+    const elSampai = document.getElementById('filter-sampai');
+    if(elDari) elDari.value = dari || '';
+    if(elSampai) elSampai.value = sampai || '';
+  }
+  renderTrxTable();
+}
+
+function getTrxDateRange(mode){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  if(mode === 'harian'){
+    const today = fmt(now);
+    return {dari: today, sampai: today};
+  }
+  if(mode === 'mingguan'){
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay() + (now.getDay()===0?-6:1));
+    return {dari: fmt(start), sampai: fmt(now)};
+  }
+  if(mode === 'bulanan'){
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {dari: fmt(start), sampai: fmt(now)};
+  }
+  return {dari: '', sampai: ''}; // semua
+}
+
 function renderTrxTable(){
   let all=DB.get('transaksi_buku')||[];
   const jenis=document.getElementById('filter-jenis').value;
   const kat=document.getElementById('filter-kat').value;
-  const dari=document.getElementById('filter-dari').value;
-  const sampai=document.getElementById('filter-sampai').value;
+  let dari, sampai;
+  if(_trxPeriod === 'custom'){
+    dari = document.getElementById('filter-dari').value;
+    sampai = document.getElementById('filter-sampai').value;
+  } else {
+    const range = getTrxDateRange(_trxPeriod);
+    dari = range.dari; sampai = range.sampai;
+  }
   if(jenis) all=all.filter(t=>t.jenis===jenis);
   if(kat) all=all.filter(t=>t.kategori===kat);
   if(dari) all=all.filter(t=>t.tanggal>=dari);
@@ -2791,6 +2934,9 @@ function renderTrxTable(){
 }
 
 function resetFilterTrx(){
+  _trxPeriod = 'semua';
+  document.querySelectorAll('#trx-period-tabs .report-tab').forEach((b,i)=>b.classList.toggle('active', i===3));
+  document.getElementById('trx-custom-range').style.display = 'none';
   ['filter-jenis','filter-kat'].forEach(id=>document.getElementById(id).value='');
   ['filter-dari','filter-sampai'].forEach(id=>document.getElementById(id).value='');
   renderTrxTable();
@@ -2867,12 +3013,46 @@ function exportBukuCSV(){
 /* ============================================================
    LAPORAN BUKU KAS (LABA RUGI)
 ============================================================ */
-function renderLaporanBuku(){
+let _lapBukuPeriod = 'bulanan';
+
+function setLapBukuPeriod(mode, el){
+  _lapBukuPeriod = mode;
+  document.querySelectorAll('#lapbuku-period-tabs .report-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  // Tampilkan / sembunyikan filter bulan-tahun hanya saat mode bulanan
+  const bulanFilter = document.getElementById('lapbuku-bulan-filter');
+  bulanFilter.style.display = mode === 'bulanan' ? 'flex' : 'none';
+  renderLaporanBuku();
+}
+
+function getLapBukuData(){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const all = DB.get('transaksi_buku')||[];
+  const bln=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  if(_lapBukuPeriod === 'harian'){
+    const today = fmt(now);
+    return { data: all.filter(t=>t.tanggal===today), label: 'Hari Ini — '+now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) };
+  }
+  if(_lapBukuPeriod === 'mingguan'){
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay() + (now.getDay()===0?-6:1));
+    const startStr = fmt(start), endStr = fmt(now);
+    return { data: all.filter(t=>t.tanggal>=startStr && t.tanggal<=endStr), label: `Minggu Ini — ${start.toLocaleDateString('id-ID',{day:'numeric',month:'short'})} s/d ${now.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}` };
+  }
+  if(_lapBukuPeriod === 'semua'){
+    return { data: all, label: 'Semua Data' };
+  }
+  // bulanan (default)
   const bulan=parseInt(document.getElementById('lr-bulan').value);
   const tahun=parseInt(document.getElementById('lr-tahun').value);
   const prefix=tahun+'-'+String(bulan+1).padStart(2,'0');
-  const all=DB.get('transaksi_buku')||[];
-  const bulanIni=all.filter(t=>t.tanggal.startsWith(prefix));
+  return { data: all.filter(t=>t.tanggal.startsWith(prefix)), label: `${bln[bulan]} ${tahun}` };
+}
+
+function renderLaporanBuku(){
+  const {data: bulanIni, label: periodeLabel} = getLapBukuData();
   const masukArr=bulanIni.filter(t=>t.jenis==='masuk');
   const keluarArr=bulanIni.filter(t=>t.jenis==='keluar');
   const totalMasuk=masukArr.reduce((s,t)=>s+t.nominal,0);
@@ -2884,7 +3064,6 @@ function renderLaporanBuku(){
   masukArr.forEach(t=>{ masukByKat[t.kategori]=(masukByKat[t.kategori]||0)+t.nominal; });
   keluarArr.forEach(t=>{ keluarByKat[t.kategori]=(keluarByKat[t.kategori]||0)+t.nominal; });
 
-  const bln=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
   const container=document.getElementById('lr-content');
   container.innerHTML=`
     <div class="lr-grid">
@@ -2903,7 +3082,7 @@ function renderLaporanBuku(){
     </div>
     <div class="lr-card">
       <div class="lr-row grand" style="padding:0">
-        <span>🎯 ${labaRugi>=0?'LABA BERSIH':'RUGI BERSIH'} — ${bln[bulan]} ${tahun}</span>
+        <span>🎯 ${labaRugi>=0?'LABA BERSIH':'RUGI BERSIH'} — ${periodeLabel}</span>
         <span style="font-family:var(--font-mono);color:${labaRugi>=0?'var(--green)':'var(--red)'}">${rp(Math.abs(labaRugi))}</span>
       </div>
       <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
@@ -2928,13 +3107,10 @@ function renderLaporanBuku(){
 }
 
 function exportLaporanCSV(){
-  const bulan=parseInt(document.getElementById('lr-bulan').value);
-  const tahun=parseInt(document.getElementById('lr-tahun').value);
-  const prefix=tahun+'-'+String(bulan+1).padStart(2,'0');
-  const all=(DB.get('transaksi_buku')||[]).filter(t=>t.tanggal.startsWith(prefix));
-  const rows=[['Tanggal','Keterangan','Kategori','Jenis','Nominal'],...all.map(t=>[t.tanggal,t.ket,t.kategori,t.jenis,t.nominal])];
-  const bln=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-  downloadCSV(rows,`laporan_${bln[bulan]}_${tahun}.csv`);
+  const {data, label} = getLapBukuData();
+  const rows=[['Tanggal','Keterangan','Kategori','Jenis','Nominal'],...data.map(t=>[t.tanggal,t.ket,t.kategori,t.jenis,t.nominal])];
+  const slug = label.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
+  downloadCSV(rows,`laporan_${slug}_${Date.now()}.csv`);
 }
 
 /* ============================================================
