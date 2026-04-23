@@ -89,6 +89,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-si
 input,button,select,textarea{font-family:var(--font-body);font-size:14px;outline:none;border:none}
 button{cursor:pointer} a{color:inherit;text-decoration:none}
 .hidden{display:none!important}
+.admin-only{display:none}
+body.is-admin .admin-only{display:inline-flex}
+tr.admin-only{display:table-row}
+div.admin-only{display:flex}
 
 /* TOAST */
 #toast-container{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
@@ -790,7 +794,7 @@ body.is-admin .admin-only { display: flex !important; }
         <h2>📦 Master Produk & Inventory</h2>
         <div style="display:flex;gap:8px">
           <button class="btn btn-ghost" onclick="exportProdukCSV()">⬇️ Export CSV</button>
-          <button class="btn btn-primary" onclick="openModalProduk()">+ Tambah Produk</button>
+          <button class="btn btn-primary admin-only" onclick="openModalProduk()">+ Tambah Produk</button>
         </div>
       </div>
       <div class="search-bar">
@@ -812,7 +816,7 @@ body.is-admin .admin-only { display: flex !important; }
     <div class="page-body hidden" id="pg-riwayat">
       <div class="page-header">
         <h2>📋 Riwayat Transaksi</h2>
-        <div style="display:flex;gap:8px">
+        <div class="admin-only" style="gap:8px">
           <button class="btn btn-ghost" onclick="exportRiwayatCSV()">⬇️ CSV</button>
           <button class="btn btn-danger" onclick="clearAllTransaksiKasir()">🗑 Hapus Semua</button>
         </div>
@@ -911,6 +915,13 @@ body.is-admin .admin-only { display: flex !important; }
 
     <!-- ========== DASHBOARD BUKU ========== -->
     <div class="page-body hidden" id="pg-dashboard-buku">
+      <div class="page-header">
+        <h2>📊 Arus Kas (Buku)</h2>
+        <div class="admin-only" style="gap:10px">
+          <button class="btn btn-ghost" onclick="exportBukuCSV()">⬇️ Export CSV</button>
+          <button class="btn btn-primary" onclick="openModalTrx()">+ Transaksi</button>
+        </div>
+      </div>
       <div class="stats-grid">
         <div class="stat-card yellow"><div class="stat-label">Pemasukan Bulan Ini</div><div class="stat-value" id="bd-masuk" style="font-size:18px">Rp 0</div><div class="stat-icon">💰</div></div>
         <div class="stat-card red"><div class="stat-label">Pengeluaran Bulan Ini</div><div class="stat-value" id="bd-keluar" style="font-size:18px">Rp 0</div><div class="stat-icon">💸</div></div>
@@ -1300,10 +1311,10 @@ body.is-admin .admin-only { display: flex !important; }
 <div class="modal-overlay hidden" id="modal-pelanggan">
   <div class="modal">
     <h3 id="modal-pelanggan-title">➕ Tambah Pelanggan</h3>
-    <input type="hidden" id="mp-id"/>
-    <div class="form-group"><label>Nama Pelanggan / Usaha</label><input type="text" id="mp-nama" class="form-input"/></div>
-    <div class="form-group"><label>Nomor HP (Contoh: 628...)</label><input type="text" id="mp-hp" class="form-input" placeholder="628123..."/></div>
-    <div class="form-group"><label>Alamat</label><textarea id="mp-alamat" class="form-input" placeholder="Alamat pengiriman / usaha..."></textarea></div>
+    <input type="hidden" id="mcp-id"/>
+    <div class="form-group"><label>Nama Pelanggan / Usaha</label><input type="text" id="mcp-nama" class="form-input"/></div>
+    <div class="form-group"><label>Nomor HP (Contoh: 628...)</label><input type="text" id="mcp-hp" class="form-input" placeholder="628123..."/></div>
+    <div class="form-group"><label>Alamat</label><textarea id="mcp-alamat" class="form-input" placeholder="Alamat pengiriman / usaha..."></textarea></div>
     <div style="display:flex;gap:10px;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeModal('modal-pelanggan')" style="flex:1">Batal</button>
       <button class="btn btn-primary" onclick="savePelanggan()" style="flex:2">Simpan Data</button>
@@ -2088,8 +2099,10 @@ function renderProdukTable(){
         <td style="font-family:var(--font-mono);color:var(--accent)">${rp(p.harga)}</td>
         <td style="font-family:var(--font-mono);color:${margin>=20?'var(--green)':margin>=10?'var(--accent)':'var(--red)'}">${margin!==null?margin+'%':'—'}</td>
         <td><div style="display:flex;gap:6px">
-          <button class="btn-icon" onclick="editProduk(${p.id})">✏️</button>
-          <button class="btn-icon" onclick="hapusProduk(${p.id})">🗑</button>
+          <div class="admin-only" style="gap:6px">
+            <button class="btn-icon" onclick="editProduk(${p.id})">✏️</button>
+            <button class="btn-icon" onclick="hapusProduk(${p.id})">🗑</button>
+          </div>
         </div></td>
       </tr>`;
     }).join('');
@@ -2130,6 +2143,8 @@ function editProduk(id){
 }
 
 function saveProduk(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa mengubah data produk','error'); return; }
   const id=document.getElementById('mp-id').value;
   const nama=document.getElementById('mp-nama').value.trim();
   const harga=parseInt(document.getElementById('mp-harga').value);
@@ -2155,6 +2170,8 @@ function saveProduk(){
 }
 
 function hapusProduk(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus produk ini secara permanen?',()=>{ DB.set('produk',(DB.get('produk')||[]).filter(p=>p.id!==id)); renderProdukTable(); toast('Produk dihapus','error'); });
 }
 
@@ -2184,6 +2201,7 @@ function renderRiwayat(){
         <span class="trx-time">${new Date(t.waktu).toLocaleString('id-ID')} — ${t.kasir}${t.pelanggan?' | '+t.pelanggan:''}</span>
         <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(77,166,255,.1);color:var(--blue)">${t.metode||'cash'}</span>
         <span class="trx-total">${rp(t.total)}</span>
+        <button class="btn-icon btn-sm admin-only" onclick="hapusRiwayat('${t.id}')" title="Hapus Riwayat">🗑</button>
       </div>
       <div class="history-body">
         ${t.items.map(i=>`<div class="history-item-row"><span>${i.nama} × ${i.qty}</span><span>${rp(i.subtotal)}</span></div>`).join('')}
@@ -2202,7 +2220,23 @@ function clearRiwayatFilter(){
 }
 
 function clearAllTransaksiKasir(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa menghapus riwayat','error'); return; }
   konfirm('Hapus SEMUA riwayat transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); renderRiwayat(); toast('Semua riwayat dihapus','error'); });
+}
+
+function hapusRiwayat(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  konfirm('Hapus transaksi ini?',()=>{
+    const trx = DB.get('transaksi_kasir')||[];
+    DB.set('transaksi_kasir', trx.filter(t=>t.id!==id));
+    // Opsional: hapus juga dari buku kas jika ada sync
+    const buku = DB.get('transaksi_buku')||[];
+    DB.set('transaksi_buku', buku.filter(t=>t.kasirRef!==id && t.id!=='SYNC-'+id));
+    renderRiwayat();
+    toast('Transaksi dihapus','error');
+  });
 }
 
 function exportRiwayatCSV(){
@@ -2286,6 +2320,8 @@ function renderUsers(){
 function openModalUser(){ openModal('modal-user'); ['mu-nama','mu-username','mu-password'].forEach(id=>document.getElementById(id).value=''); }
 
 function saveUser(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const nama=document.getElementById('mu-nama').value.trim();
   const username=document.getElementById('mu-username').value.trim();
   const password=document.getElementById('mu-password').value;
@@ -2299,6 +2335,8 @@ function saveUser(){
 }
 
 function hapusUser(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus user ini?',()=>{ DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id)); renderUsers(); });
 }
 
@@ -2313,6 +2351,8 @@ function openModalGantiPass(id){
 }
 
 function saveGantiPass(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id = parseInt(document.getElementById('gp-user-id').value);
   const newPass = document.getElementById('gp-new-pass').value;
   const confirmPass = document.getElementById('gp-confirm-pass').value;
@@ -2377,8 +2417,16 @@ function selectEmoji(el,emoji){
   el.classList.add('sel');
 }
 
-function resetProduk(){ konfirm('Hapus SEMUA produk?',()=>{ DB.remove('produk'); initData(); toast('Produk direset','error'); }); }
-function resetTransaksiKasir(){ konfirm('Hapus SEMUA transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); toast('Transaksi dihapus','error'); }); }
+function resetProduk(){ 
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  konfirm('Hapus SEMUA produk?',()=>{ DB.remove('produk'); initData(); toast('Produk direset','error'); }); 
+}
+function resetTransaksiKasir(){ 
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  konfirm('Hapus SEMUA transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); toast('Transaksi dihapus','error'); }); 
+}
 
 /* ============================================================
    BUKU KAS — DASHBOARD
@@ -2493,10 +2541,12 @@ function renderTrxTable(){
       ${t.jenis==='masuk'?'+':'-'}${rp(t.nominal)}</td>
     <td style="font-family:var(--font-mono);font-size:12px;color:${(saldoMap[t.id]||0)>=0?'var(--text)':'var(--red)'}">
       ${rp(saldoMap[t.id]||0)}</td>
-    <td>${t.sumber!=='kasir'?`<div style="display:flex;gap:6px">
-      <button class="btn-icon" onclick="editTrx('${t.id}')">✏️</button>
-      <button class="btn-icon" onclick="hapusTrx('${t.id}')">🗑</button>
-    </div>`:'<span style="font-size:11px;color:var(--muted)">auto</span>'}</td>
+    <td>
+      <div class="admin-only" style="display:flex;gap:6px">
+        <button class="btn-icon" onclick="editTrx('${t.id}')">✏️</button>
+        <button class="btn-icon" onclick="hapusTrx('${t.id}')">🗑</button>
+      </div>
+    </td>
   </tr>`).join('');
 }
 
@@ -2523,6 +2573,8 @@ function openModalTrx(){
 }
 
 function editTrx(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa mengubah data','error'); return; }
   const t=(DB.get('transaksi_buku')||[]).find(x=>x.id===id); if(!t)return;
   document.getElementById('modal-trx-title').textContent='✏️ Edit Transaksi';
   document.getElementById('mt-id').value=t.id;
@@ -2536,6 +2588,8 @@ function editTrx(id){
 }
 
 function saveTrx(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id=document.getElementById('mt-id').value;
   const tanggal=document.getElementById('mt-tanggal').value;
   const jenis=document.getElementById('mt-jenis').value;
@@ -2558,6 +2612,8 @@ function saveTrx(){
 }
 
 function hapusTrx(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus transaksi ini?',()=>{ DB.set('transaksi_buku',(DB.get('transaksi_buku')||[]).filter(t=>t.id!==id)); renderTrxTable(); toast('Transaksi dihapus','error'); });
 }
 
@@ -2794,6 +2850,8 @@ function openModalHutang(){
 }
 
 function saveHutang(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id=document.getElementById('mh-id').value;
   const jenis=document.getElementById('mh-jenis').value;
   const nama=document.getElementById('mh-nama').value.trim();
@@ -2811,12 +2869,39 @@ function saveHutang(){
 function lunaskanHutang(id){
   konfirm('Tandai sudah lunas?',()=>{
     const all=DB.get('hutang_piutang')||[];
-    const idx=all.findIndex(h=>h.id===id); if(idx>-1) all[idx].status='lunas';
-    DB.set('hutang_piutang',all); renderHutang(); toast('Ditandai lunas ✅','success');
+    const idx=all.findIndex(h=>h.id===id); 
+    if(idx>-1) {
+      all[idx].status='lunas';
+      
+      // Auto sync to transaksi_buku
+      const h = all[idx];
+      const bAll = DB.get('transaksi_buku')||[];
+      const jenisBuku = h.jenis === 'hutang' ? 'keluar' : 'masuk';
+      const katBuku = h.jenis === 'hutang' ? 'Hutang dibayar' : 'Piutang masuk';
+      
+      bAll.push({
+        id: 'HP-PAY-'+h.id+'-'+Date.now(),
+        tanggal: new Date().toISOString().slice(0,10),
+        jenis: jenisBuku,
+        ket: `${h.jenis==='hutang'?'Pelunasan Hutang':'Penerimaan Piutang'} — ${h.nama}`,
+        kategori: katBuku,
+        nominal: h.jumlah,
+        catatan: h.catatan || '',
+        sumber: 'hutang_piutang'
+      });
+      DB.set('transaksi_buku', bAll);
+      DB.set('hutang_piutang',all); 
+      renderHutang(); 
+      toast('Ditandai lunas & tercatat di Buku Kas ✅','success');
+    }
   });
 }
 
+
+
 function hapusHutang(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus catatan ini?',()=>{ DB.set('hutang_piutang',(DB.get('hutang_piutang')||[]).filter(h=>h.id!==id)); renderHutang(); toast('Dihapus','error'); });
 }
 
@@ -2978,25 +3063,27 @@ function renderPelanggan(){
 
 function openModalPelanggan(){
   document.getElementById('modal-pelanggan-title').textContent='➕ Tambah Pelanggan';
-  ['mp-id','mp-nama','mp-hp','mp-alamat'].forEach(k=>document.getElementById(k).value='');
+  ['mcp-id','mcp-nama','mcp-hp','mcp-alamat'].forEach(k=>document.getElementById(k).value='');
   openModal('modal-pelanggan');
 }
 
 function editPelanggan(id){
   const p = (DB.get('pelanggan')||[]).find(x=>x.id===id); if(!p)return;
   document.getElementById('modal-pelanggan-title').textContent='✏️ Edit Pelanggan';
-  document.getElementById('mp-id').value=p.id;
-  document.getElementById('mp-nama').value=p.nama;
-  document.getElementById('mp-hp').value=p.hp||'';
-  document.getElementById('mp-alamat').value=p.alamat||'';
+  document.getElementById('mcp-id').value=p.id;
+  document.getElementById('mcp-nama').value=p.nama;
+  document.getElementById('mcp-hp').value=p.hp||'';
+  document.getElementById('mcp-alamat').value=p.alamat||'';
   openModal('modal-pelanggan');
 }
 
 function savePelanggan(){
-  const id=document.getElementById('mp-id').value;
-  const nama=document.getElementById('mp-nama').value.trim();
-  const hp=document.getElementById('mp-hp').value.trim();
-  const alamat=document.getElementById('mp-alamat').value.trim();
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  const id=document.getElementById('mcp-id').value;
+  const nama=document.getElementById('mcp-nama').value.trim();
+  const hp=document.getElementById('mcp-hp').value.trim();
+  const alamat=document.getElementById('mcp-alamat').value.trim();
   if(!nama) return toast('Nama pelanggan wajib diisi','error');
   
   let all=DB.get('pelanggan')||[];
@@ -3013,6 +3100,8 @@ function savePelanggan(){
 }
 
 function hapusPelanggan(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus data pelanggan ini?',()=>{
     DB.set('pelanggan',(DB.get('pelanggan')||[]).filter(p=>p.id!==id));
     renderPelanggan(); toast('Dihapus','error');
@@ -3096,6 +3185,8 @@ function rmTagihanItem(idx){
 }
 
 function saveTagihan(){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const pid = document.getElementById('mtg-pelanggan').value;
   if(!pid) return toast('Pelanggan harus diisi', 'error');
   if(window._tagihanDraftItems.length===0) return toast('Item kosong!', 'error');
@@ -3135,15 +3226,26 @@ function lunasTagihan(id){
       const pIdx = pel.findIndex(x=>x.id===inv.idPelanggan);
       if(pIdx>-1) { pel[pIdx].totalBelanja += inv.total; DB.set('pelanggan',pel); }
       // Auto add to Keuangan (Pemasukan)
-      const trxs = DB.get('transaksi')||[];
-      trxs.push({id:Date.now(),jenis:'masuk',kategori:'Penjualan (Faktur)',nominal:inv.total,tanggal:new Date().toISOString().split('T')[0],ket:`Pelunasan INV-${id}`});
-      DB.set('transaksi',trxs);
+      const trxs = DB.get('transaksi_buku')||[];
+      trxs.push({
+        id:'INV-PAY-'+id+'-'+Date.now(),
+        jenis:'masuk',
+        kategori:'Penjualan (Faktur)',
+        nominal:inv.total,
+        tanggal:new Date().toISOString().split('T')[0],
+        ket:`Pelunasan INV-${id}`,
+        sumber:'invoice',
+        catatan:`Faktur ID: ${id}`
+      });
+      DB.set('transaksi_buku',trxs);
     }
     renderTagihan(); toast('Faktur lunas dicatat di Keuangan!','success');
   });
 }
 
 function hapusTagihan(id){
+  const session = getSession();
+  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus Faktur ini secara permanen?',()=>{
     DB.set('tagihan', (DB.get('tagihan')||[]).filter(x=>x.id!==id));
     renderTagihan();
@@ -3153,7 +3255,7 @@ function hapusTagihan(id){
 function waTagihan(id){
   const t = DB.get('tagihan').find(x=>x.id===id);
   const p = DB.get('pelanggan').find(x=>x.id===t.idPelanggan);
-  const toko = DB.get('toko')||{nama:'UMKMku Toko',hp:''};
+  const toko = getSetting();
   
   let txt = `*FAKTUR TAGIHAN - ${toko.nama}*\nNo: INV-${t.id}\nTanggal: ${new Date(t.tanggal).toLocaleDateString('id-ID')}\nKepada: ${p.nama}\n\n`;
   t.items.forEach(x=> txt += `${x.nama} (x${x.qty}) - ${rp(x.harga*x.qty - (x.diskon||0))}\n`);
