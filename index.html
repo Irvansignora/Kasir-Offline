@@ -734,7 +734,7 @@ body.is-admin .admin-only { display: flex !important; }
     </div>
 
     <!-- ========== KASIR ========== -->
-    <div class="page-body hidden" id="pg-kasir" style="padding:16px;overflow:hidden;display:flex;flex-direction:column;height:calc(100vh - 60px)">
+    <div class="page-body hidden" id="pg-kasir" style="padding:16px;display:flex;flex-direction:column;height:calc(100vh - 60px);overflow:hidden">
       <div class="kasir-layout">
         <div class="kasir-left">
           <div class="kasir-search">
@@ -1566,8 +1566,6 @@ const DB = {
 function getSetting(){
   return DB.get('setting')||{nama:'Toko Saya',strukHeader:'Toko Saya',alamat:'',telp:'',strukFooter:'Terima kasih!',showAlamat:'1',showTelp:'1',emoji:'🏪',accentColor:'#f5c842',accentColor2:'#e8a020',lowStock:5,currency:'Rp',pajak:0};
 }
-function getSession(){ return DB.get('session'); }
-function setSession(v){ DB.set('session',v); }
 function rp(n){
   const s=getSetting();
   return s.currency+' '+Math.round(n||0).toLocaleString('id-ID');
@@ -2366,8 +2364,8 @@ function saveGantiPass(){
   users[idx].password = hashPass(newPass);
   DB.set('users', users);
   // Update session if changing own password
-  const session = getSession();
-  if(session && session.id === id){ session.password = users[idx].password; setSession(session); }
+  const currentSession = getSession();
+  if(currentSession && currentSession.id === id){ currentSession.password = users[idx].password; setSession(currentSession); }
   closeModal('modal-ganti-pass');
   toast('Password berhasil diubah ✅','success');
 }
