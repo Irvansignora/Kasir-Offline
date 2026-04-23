@@ -1,7 +1,7 @@
 {
-  "name": "KasirKu — Point of Sale",
-  "short_name": "KasirKu",
-  "description": "Aplikasi kasir offline modern untuk toko Anda",
+  "name": "UMKMku",
+  "short_name": "UMKMku",
+  "description": "Aplikasi kasir offline modern untuk UMKM",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",
