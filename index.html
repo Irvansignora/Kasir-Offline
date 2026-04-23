@@ -13,6 +13,7 @@
 <meta name="description" content="Aplikasi kasir + pembukuan UMKM offline — kelola produk, transaksi, stok, dan laporan keuangan."/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--border:#e2e8f0;
@@ -639,7 +640,7 @@ body.is-admin .admin-only { display: flex !important; }
         <div class="nav-item" onclick="showPage('riwayat')"><span class="nav-icon">📋</span><span>Riwayat Kasir</span></div>
       </div>
       
-      <div class="nav-group">
+      <div class="nav-group" id="nav-produk">
         <div class="nav-label">Manajemen Produk</div>
         <div class="nav-item" onclick="showPage('produk')"><span class="nav-icon">📦</span><span>Produk & Inventory</span></div>
         <div class="nav-item" onclick="showPage('hpp')"><span class="nav-icon">🧮</span><span>Kalkulator HPP</span></div>
@@ -701,8 +702,8 @@ body.is-admin .admin-only { display: flex !important; }
         <div class="mm-card" onclick="showPage('dashboard-kasir')"><div class="mm-icon">📊</div><div class="mm-text">Dashboard Bisnis</div></div>
         <div class="mm-card" onclick="showPage('kasir')"><div class="mm-icon">🛒</div><div class="mm-text">POS Kasir</div></div>
         <div class="mm-card" onclick="showPage('riwayat')"><div class="mm-icon">📋</div><div class="mm-text">Riwayat Kasir</div></div>
-        <div class="mm-card" onclick="showPage('produk')"><div class="mm-icon">📦</div><div class="mm-text">Produk & Inventory</div></div>
-        <div class="mm-card" onclick="showPage('hpp')"><div class="mm-icon">🧮</div><div class="mm-text">Kalkulator HPP</div></div>
+        <div class="mm-card admin-only" onclick="showPage('produk')"><div class="mm-icon">📦</div><div class="mm-text">Produk & Inventory</div></div>
+        <div class="mm-card admin-only" onclick="showPage('hpp')"><div class="mm-icon">🧮</div><div class="mm-text">Kalkulator HPP</div></div>
         <div class="mm-card admin-only" onclick="showPage('transaksi')"><div class="mm-icon">📝</div><div class="mm-text">Arus Kas</div></div>
         <div class="mm-card admin-only" onclick="showPage('laporan-buku')"><div class="mm-icon">📈</div><div class="mm-text">Laporan Keuangan</div></div>
         <div class="mm-card admin-only" onclick="showPage('pelanggan')"><div class="mm-icon">👥</div><div class="mm-text">Data Pelanggan</div></div>
@@ -792,9 +793,12 @@ body.is-admin .admin-only { display: flex !important; }
     <div class="page-body hidden" id="pg-produk">
       <div class="page-header">
         <h2>📦 Master Produk & Inventory</h2>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="exportProdukCSV()">⬇️ Export CSV</button>
-          <button class="btn btn-primary admin-only" onclick="openModalProduk()">+ Tambah Produk</button>
+          <button class="btn btn-ghost admin-only" onclick="downloadTemplateProduk()" style="display:inline-flex">📋 Template Excel</button>
+          <button class="btn btn-blue admin-only" onclick="document.getElementById('import-excel-input').click()" style="display:inline-flex">📥 Import Excel</button>
+          <input type="file" id="import-excel-input" accept=".xlsx,.xls,.csv" class="hidden" onchange="importProdukExcel(this)"/>
+          <button class="btn btn-primary admin-only" onclick="openModalProduk()" style="display:inline-flex">+ Tambah Produk</button>
         </div>
       </div>
       <div class="search-bar">
@@ -907,6 +911,24 @@ body.is-admin .admin-only { display: flex !important; }
             <div style="display:flex;gap:8px;margin-top:4px">
               <button class="btn btn-danger btn-sm" onclick="resetProduk()">🗑 Produk</button>
               <button class="btn btn-danger btn-sm" onclick="resetTransaksiKasir()">🗑 Transaksi</button>
+            </div>
+          </div>
+        </div>
+        <!-- BACKUP & RESTORE CARD -->
+        <div class="setting-card" style="grid-column:1/-1">
+          <div class="setting-card-title">💾 Backup & Restore Database</div>
+          <div class="info-band" style="margin-bottom:16px">📦 Export untuk backup atau pindah ke device lain. Saat import, data lama <b>tidak dihapus</b> — data baru akan <b>digabungkan (merge)</b> agar tidak ada yang hilang.</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+            <div style="flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px">
+              <div style="font-weight:700;margin-bottom:8px;font-size:13px">📤 Export / Backup</div>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Download semua data (produk, transaksi, pelanggan, dll.) ke file JSON.</p>
+              <button class="btn btn-primary w-full" onclick="exportDatabase()">⬇️ Download Backup (.json)</button>
+            </div>
+            <div style="flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px">
+              <div style="font-weight:700;margin-bottom:8px;font-size:13px">📥 Import / Restore</div>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Import file backup JSON. Data akan <b>digabungkan</b> — tidak ada data yang hilang dari device ini.</p>
+              <input type="file" id="import-db-input" accept=".json" class="hidden" onchange="importDatabase(this)"/>
+              <button class="btn btn-blue w-full" onclick="document.getElementById('import-db-input').click()">⬆️ Import File Backup (.json)</button>
             </div>
           </div>
         </div>
@@ -1577,8 +1599,9 @@ function toast(msg, type='info'){
 }
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
-function konfirm(msg, cb){
+function konfirm(msg, cb, okLabel){
   document.getElementById('konfirm-msg').textContent=msg;
+  document.getElementById('konfirm-ok-btn').textContent=okLabel||'Ya, Lanjutkan';
   document.getElementById('konfirm-ok-btn').onclick=()=>{ closeModal('modal-konfirm'); cb(); };
   openModal('modal-konfirm');
 }
@@ -1692,7 +1715,7 @@ function doLogin(){
 }
 
 function doLogout(){
-  konfirm('Yakin ingin logout?',()=>{ clearSession(); location.reload(); });
+  konfirm('Yakin ingin logout?',()=>{ clearSession(); location.reload(); }, 'Logout');
 }
 
 function loadApp(user){
@@ -1708,6 +1731,8 @@ function loadApp(user){
   document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
   // Show/hide Keuangan & B2B group (hidden for kasir)
   document.getElementById('nav-keuangan').style.display = isAdmin ? 'block' : 'none';
+  // Show/hide Manajemen Produk group (hidden for kasir)
+  document.getElementById('nav-produk').style.display = isAdmin ? 'block' : 'none';
   // Apply admin class to body for mobile menu CSS
   document.body.classList.toggle('is-admin', isAdmin);
 
@@ -1748,7 +1773,7 @@ const pageMap = {
 function showPage(name){
   // Role-based access guard
   const session = getSession();
-  const kasirOnlyPages = ['kasir','riwayat','produk','hpp','dashboard-kasir','mobile-menu'];
+  const kasirOnlyPages = ['kasir','riwayat','dashboard-kasir','mobile-menu'];
   if(session && session.role === 'kasir' && !kasirOnlyPages.includes(name)){
     toast('Akses ditolak — halaman ini hanya untuk Admin','error');
     return;
@@ -2172,13 +2197,228 @@ function saveProduk(){
 function hapusProduk(id){
   const session = getSession();
   if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
-  konfirm('Hapus produk ini secara permanen?',()=>{ DB.set('produk',(DB.get('produk')||[]).filter(p=>p.id!==id)); renderProdukTable(); toast('Produk dihapus','error'); });
+  konfirm('Hapus produk ini secara permanen?',()=>{ DB.set('produk',(DB.get('produk')||[]).filter(p=>p.id!==id)); renderProdukTable(); toast('Produk dihapus','error'); }, 'Hapus');
 }
 
 function exportProdukCSV(){
   const produk=DB.get('produk')||[];
   const rows=[['ID','Nama','Kategori','Satuan','Stok','Min Stok','Harga Modal','Harga Jual'],...produk.map(p=>[p.id,p.nama,p.kategori||'',p.satuan||'',p.stok,p.minStok||5,p.modal||0,p.harga])];
   downloadCSV(rows,'produk_inventory_'+Date.now()+'.csv');
+}
+
+/* ============================================================
+   IMPORT PRODUK DARI EXCEL / CSV
+============================================================ */
+function downloadTemplateProduk(){
+  if(typeof XLSX === 'undefined'){ toast('Library Excel belum siap, coba lagi','error'); return; }
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['Nama Produk*','Kategori','Satuan','Stok*','Min Stok','Harga Modal','Harga Jual*'],
+    ['Indomie Goreng','Makanan','pcs','50','5','2500','3500'],
+    ['Aqua 600ml','Minuman','botol','30','5','2800','4000'],
+    ['--- Keterangan ---','','','','','',''],
+    ['* = wajib diisi','','','','','',''],
+    ['Hapus baris contoh sebelum import','','','','','',''],
+  ]);
+  ws['!cols'] = [{wch:22},{wch:15},{wch:10},{wch:8},{wch:10},{wch:14},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Template Produk');
+  XLSX.writeFile(wb, 'template_import_produk.xlsx');
+  toast('Template Excel didownload! 📋','success');
+}
+
+function importProdukExcel(input){
+  const session = getSession();
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  const file = input.files[0]; if(!file) return;
+  
+  const ext = file.name.split('.').pop().toLowerCase();
+  
+  const processData = (rows) => {
+    // Skip header row
+    const dataRows = rows.slice(1).filter(r => r[0] && String(r[0]).trim() && !String(r[0]).startsWith('---') && !String(r[0]).startsWith('*'));
+    if(!dataRows.length){ toast('Tidak ada data produk yang valid di file','error'); return; }
+    
+    let produk = DB.get('produk') || [];
+    let maxId = produk.length > 0 ? Math.max(...produk.map(p=>p.id)) : 0;
+    let added = 0, updated = 0, errors = 0;
+    
+    dataRows.forEach((r, i) => {
+      const nama = String(r[0]||'').trim();
+      const kategori = String(r[1]||'').trim();
+      const satuan = String(r[2]||'').trim();
+      const stok = parseInt(r[3]) || 0;
+      const minStok = parseInt(r[4]) || 5;
+      const modal = parseInt(r[5]) || 0;
+      const harga = parseInt(r[6]) || 0;
+      
+      if(!nama){ errors++; return; }
+      if(harga <= 0){ errors++; return; }
+      
+      // Cek apakah nama sudah ada (update stok & harga)
+      const existIdx = produk.findIndex(p => p.nama.toLowerCase() === nama.toLowerCase());
+      if(existIdx > -1){
+        produk[existIdx] = {...produk[existIdx], nama, kategori, satuan, stok, minStok, modal, harga};
+        updated++;
+      } else {
+        maxId++;
+        produk.push({id:maxId, nama, kategori, satuan, stok, minStok, modal, harga});
+        added++;
+      }
+    });
+    
+    DB.set('produk', produk);
+    renderProdukTable();
+    toast(`Import selesai! ✅ +${added} produk baru, ~${updated} diperbarui, ${errors} dilewati`, 'success');
+    input.value = ''; // reset input
+  };
+  
+  if(ext === 'csv'){
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const rows = text.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
+      processData(rows);
+    };
+    reader.readAsText(file);
+  } else {
+    if(typeof XLSX === 'undefined'){ toast('Library Excel belum siap','error'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        processData(rows);
+      } catch(err) {
+        toast('Gagal membaca file Excel: ' + err.message, 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+/* ============================================================
+   BACKUP & RESTORE DATABASE
+============================================================ */
+const DB_KEYS = ['produk','transaksi_kasir','transaksi_buku','pelanggan','tagihan','hutang_piutang','hpp_bahan','setting','users'];
+
+function exportDatabase(){
+  const session = getSession();
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  
+  const backup = {
+    _version: 1,
+    _exportedAt: new Date().toISOString(),
+    _exportedBy: session.nama,
+    data: {}
+  };
+  
+  DB_KEYS.forEach(k => {
+    const val = DB.get(k);
+    if(val !== null) backup.data[k] = val;
+  });
+  
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'umkmku_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup berhasil didownload! 💾','success');
+}
+
+function importDatabase(input){
+  const session = getSession();
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  const file = input.files[0]; if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if(!backup.data){ toast('Format file backup tidak valid','error'); return; }
+      
+      konfirm('Import & gabungkan data dari file backup ini? Data yang sudah ada di device ini TIDAK akan dihapus — hanya ditambah/diperbarui dari backup.', () => {
+        let stats = {produk:0, transaksi_kasir:0, transaksi_buku:0, pelanggan:0, tagihan:0};
+        
+        // MERGE PRODUK — berdasarkan nama
+        if(backup.data.produk){
+          let local = DB.get('produk') || [];
+          let maxId = local.length > 0 ? Math.max(...local.map(p=>p.id)) : 0;
+          backup.data.produk.forEach(bp => {
+            const exists = local.find(p => p.nama.toLowerCase() === bp.nama.toLowerCase());
+            if(!exists){
+              maxId++;
+              local.push({...bp, id: maxId});
+              stats.produk++;
+            }
+          });
+          DB.set('produk', local);
+        }
+        
+        // MERGE TRANSAKSI KASIR — berdasarkan ID
+        if(backup.data.transaksi_kasir){
+          let local = DB.get('transaksi_kasir') || [];
+          const existIds = new Set(local.map(t => t.id));
+          backup.data.transaksi_kasir.forEach(bt => {
+            if(!existIds.has(bt.id)){ local.push(bt); stats.transaksi_kasir++; }
+          });
+          DB.set('transaksi_kasir', local);
+        }
+        
+        // MERGE TRANSAKSI BUKU — berdasarkan ID
+        if(backup.data.transaksi_buku){
+          let local = DB.get('transaksi_buku') || [];
+          const existIds = new Set(local.map(t => t.id));
+          backup.data.transaksi_buku.forEach(bt => {
+            if(!existIds.has(bt.id)){ local.push(bt); stats.transaksi_buku++; }
+          });
+          DB.set('transaksi_buku', local);
+        }
+        
+        // MERGE PELANGGAN — berdasarkan nama
+        if(backup.data.pelanggan){
+          let local = DB.get('pelanggan') || [];
+          let maxId = local.length > 0 ? Math.max(...local.map(p=>p.id)) : 0;
+          backup.data.pelanggan.forEach(bp => {
+            const exists = local.find(p => p.nama.toLowerCase() === bp.nama.toLowerCase());
+            if(!exists){ maxId++; local.push({...bp, id:maxId}); stats.pelanggan++; }
+          });
+          DB.set('pelanggan', local);
+        }
+        
+        // MERGE TAGIHAN — berdasarkan ID
+        if(backup.data.tagihan){
+          let local = DB.get('tagihan') || [];
+          const existIds = new Set(local.map(t => t.id));
+          backup.data.tagihan.forEach(bt => {
+            if(!existIds.has(bt.id)){ local.push(bt); stats.tagihan++; }
+          });
+          DB.set('tagihan', local);
+        }
+        
+        // MERGE HUTANG — berdasarkan ID
+        if(backup.data.hutang_piutang){
+          let local = DB.get('hutang_piutang') || [];
+          const existIds = new Set(local.map(t => t.id));
+          backup.data.hutang_piutang.forEach(bt => {
+            if(!existIds.has(bt.id)){ local.push(bt); }
+          });
+          DB.set('hutang_piutang', local);
+        }
+        
+        input.value = '';
+        const total = Object.values(stats).reduce((a,b)=>a+b, 0);
+        toast(`Import berhasil! ✅ ${stats.produk} produk, ${stats.transaksi_kasir} trx kasir, ${stats.transaksi_buku} trx buku, ${stats.pelanggan} pelanggan ditambahkan.`, 'success');
+        renderSetting();
+      });
+    } catch(err) {
+      toast('Gagal membaca file backup: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
 }
 
 /* ============================================================
@@ -2222,7 +2462,7 @@ function clearRiwayatFilter(){
 function clearAllTransaksiKasir(){
   const session = getSession();
   if(session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa menghapus riwayat','error'); return; }
-  konfirm('Hapus SEMUA riwayat transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); renderRiwayat(); toast('Semua riwayat dihapus','error'); });
+  konfirm('Hapus SEMUA riwayat transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); renderRiwayat(); toast('Semua riwayat dihapus','error'); }, 'Hapus Semua');
 }
 
 function hapusRiwayat(id){
@@ -2236,7 +2476,7 @@ function hapusRiwayat(id){
     DB.set('transaksi_buku', buku.filter(t=>t.kasirRef!==id && t.id!=='SYNC-'+id));
     renderRiwayat();
     toast('Transaksi dihapus','error');
-  });
+  }, 'Hapus');
 }
 
 function exportRiwayatCSV(){
@@ -2337,7 +2577,7 @@ function saveUser(){
 function hapusUser(id){
   const session = getSession();
   if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
-  konfirm('Hapus user ini?',()=>{ DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id)); renderUsers(); });
+  konfirm('Hapus user ini?',()=>{ DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id)); renderUsers(); }, 'Hapus');
 }
 
 function openModalGantiPass(id){
@@ -2420,12 +2660,12 @@ function selectEmoji(el,emoji){
 function resetProduk(){ 
   const session = getSession();
   if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
-  konfirm('Hapus SEMUA produk?',()=>{ DB.remove('produk'); initData(); toast('Produk direset','error'); }); 
+  konfirm('Hapus SEMUA produk?',()=>{ DB.remove('produk'); initData(); toast('Produk direset','error'); }, 'Hapus Semua'); 
 }
 function resetTransaksiKasir(){ 
   const session = getSession();
   if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
-  konfirm('Hapus SEMUA transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); toast('Transaksi dihapus','error'); }); 
+  konfirm('Hapus SEMUA transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); toast('Transaksi dihapus','error'); }, 'Hapus Semua'); 
 }
 
 /* ============================================================
@@ -2512,7 +2752,7 @@ function renderTrxTable(){
   if(kat) all=all.filter(t=>t.kategori===kat);
   if(dari) all=all.filter(t=>t.tanggal>=dari);
   if(sampai) all=all.filter(t=>t.tanggal<=sampai);
-  all.sort((a,b)=>b.tanggal.localeCompare(a.tanggal)||b.id.localeCompare(a.id));
+  all.sort((a,b)=>b.tanggal.localeCompare(a.tanggal)||String(b.id).localeCompare(String(a.id)));
 
   const allKat=[...new Set((DB.get('transaksi_buku')||[]).map(t=>t.kategori))].filter(Boolean);
   const selKat=document.getElementById('filter-kat'); const curKat=selKat.value;
@@ -2748,6 +2988,7 @@ function hitungHPP(){
   document.getElementById('r-ops').textContent=rp(totalOps);
   document.getElementById('r-total-batch').textContent=rp(totalBiaya);
   document.getElementById('r-hpp').textContent=rp(hppPerUnit);
+  _lastHppPerUnit = hppPerUnit; // cache for updateHargaCustom
 
   // Rekomendasi harga
   const reks=[
@@ -2772,8 +3013,10 @@ function pilihRekHarga(h){
   updateHargaCustom();
 }
 
+let _lastHppPerUnit = 0; // cache HPP per unit dari hitungHPP
+
 function updateHargaCustom(){
-  const hpp=parseFloat(document.getElementById('r-hpp').textContent.replace(/[^0-9]/g,''))||0;
+  const hpp = _lastHppPerUnit || 0;
   const harga=parseFloat(document.getElementById('r-harga-input').value)||0;
   const laba=harga-hpp;
   const margin=harga>0?Math.round((laba/harga)*100):0;
@@ -2894,7 +3137,7 @@ function lunaskanHutang(id){
       renderHutang(); 
       toast('Ditandai lunas & tercatat di Buku Kas ✅','success');
     }
-  });
+  }, 'Tandai Lunas');
 }
 
 
@@ -2902,7 +3145,7 @@ function lunaskanHutang(id){
 function hapusHutang(id){
   const session = getSession();
   if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
-  konfirm('Hapus catatan ini?',()=>{ DB.set('hutang_piutang',(DB.get('hutang_piutang')||[]).filter(h=>h.id!==id)); renderHutang(); toast('Dihapus','error'); });
+  konfirm('Hapus catatan ini?',()=>{ DB.set('hutang_piutang',(DB.get('hutang_piutang')||[]).filter(h=>h.id!==id)); renderHutang(); toast('Dihapus','error'); }, 'Hapus');
 }
 
 /* ============================================================
@@ -3217,14 +3460,14 @@ function saveTagihan(){
 
 function lunasTagihan(id){
   konfirm('Tandai faktur lunas?',()=>{
-    const all = DB.get('tagihan');
+    const all = DB.get('tagihan')||[];
     const inv = all.find(x=>x.id===id);
     if(inv){
       inv.status='lunas'; DB.set('tagihan',all);
       // Auto add to CRM Omset
-      const pel = DB.get('pelanggan');
+      const pel = DB.get('pelanggan')||[];
       const pIdx = pel.findIndex(x=>x.id===inv.idPelanggan);
-      if(pIdx>-1) { pel[pIdx].totalBelanja += inv.total; DB.set('pelanggan',pel); }
+      if(pIdx>-1) { pel[pIdx].totalBelanja = (pel[pIdx].totalBelanja||0) + inv.total; DB.set('pelanggan',pel); }
       // Auto add to Keuangan (Pemasukan)
       const trxs = DB.get('transaksi_buku')||[];
       trxs.push({
@@ -3254,7 +3497,9 @@ function hapusTagihan(id){
 
 function waTagihan(id){
   const t = DB.get('tagihan').find(x=>x.id===id);
-  const p = DB.get('pelanggan').find(x=>x.id===t.idPelanggan);
+  if(!t) return toast('Faktur tidak ditemukan','error');
+  const p = (DB.get('pelanggan')||[]).find(x=>x.id===t.idPelanggan);
+  if(!p) return toast('Pelanggan tidak ditemukan atau sudah dihapus','error');
   const toko = getSetting();
   
   let txt = `*FAKTUR TAGIHAN - ${toko.nama}*\nNo: INV-${t.id}\nTanggal: ${new Date(t.tanggal).toLocaleDateString('id-ID')}\nKepada: ${p.nama}\n\n`;
