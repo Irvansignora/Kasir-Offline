@@ -1566,6 +1566,8 @@ const DB = {
 function getSetting(){
   return DB.get('setting')||{nama:'Toko Saya',strukHeader:'Toko Saya',alamat:'',telp:'',strukFooter:'Terima kasih!',showAlamat:'1',showTelp:'1',emoji:'🏪',accentColor:'#f5c842',accentColor2:'#e8a020',lowStock:5,currency:'Rp',pajak:0};
 }
+function getSession(){ return DB.get('session'); }
+function setSession(v){ DB.set('session',v); }
 function rp(n){
   const s=getSetting();
   return s.currency+' '+Math.round(n||0).toLocaleString('id-ID');
@@ -2144,7 +2146,7 @@ function editProduk(id){
 
 function saveProduk(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa mengubah data produk','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa mengubah data produk','error'); return; }
   const id=document.getElementById('mp-id').value;
   const nama=document.getElementById('mp-nama').value.trim();
   const harga=parseInt(document.getElementById('mp-harga').value);
@@ -2171,7 +2173,7 @@ function saveProduk(){
 
 function hapusProduk(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus produk ini secara permanen?',()=>{ DB.set('produk',(DB.get('produk')||[]).filter(p=>p.id!==id)); renderProdukTable(); toast('Produk dihapus','error'); });
 }
 
@@ -2227,7 +2229,7 @@ function clearAllTransaksiKasir(){
 
 function hapusRiwayat(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus transaksi ini?',()=>{
     const trx = DB.get('transaksi_kasir')||[];
     DB.set('transaksi_kasir', trx.filter(t=>t.id!==id));
@@ -2321,7 +2323,7 @@ function openModalUser(){ openModal('modal-user'); ['mu-nama','mu-username','mu-
 
 function saveUser(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const nama=document.getElementById('mu-nama').value.trim();
   const username=document.getElementById('mu-username').value.trim();
   const password=document.getElementById('mu-password').value;
@@ -2336,7 +2338,7 @@ function saveUser(){
 
 function hapusUser(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus user ini?',()=>{ DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id)); renderUsers(); });
 }
 
@@ -2352,7 +2354,7 @@ function openModalGantiPass(id){
 
 function saveGantiPass(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id = parseInt(document.getElementById('gp-user-id').value);
   const newPass = document.getElementById('gp-new-pass').value;
   const confirmPass = document.getElementById('gp-confirm-pass').value;
@@ -2419,12 +2421,12 @@ function selectEmoji(el,emoji){
 
 function resetProduk(){ 
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus SEMUA produk?',()=>{ DB.remove('produk'); initData(); toast('Produk direset','error'); }); 
 }
 function resetTransaksiKasir(){ 
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus SEMUA transaksi kasir?',()=>{ DB.set('transaksi_kasir',[]); toast('Transaksi dihapus','error'); }); 
 }
 
@@ -2574,7 +2576,7 @@ function openModalTrx(){
 
 function editTrx(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa mengubah data','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak — hanya Admin yang bisa mengubah data','error'); return; }
   const t=(DB.get('transaksi_buku')||[]).find(x=>x.id===id); if(!t)return;
   document.getElementById('modal-trx-title').textContent='✏️ Edit Transaksi';
   document.getElementById('mt-id').value=t.id;
@@ -2589,7 +2591,7 @@ function editTrx(id){
 
 function saveTrx(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id=document.getElementById('mt-id').value;
   const tanggal=document.getElementById('mt-tanggal').value;
   const jenis=document.getElementById('mt-jenis').value;
@@ -2613,7 +2615,7 @@ function saveTrx(){
 
 function hapusTrx(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus transaksi ini?',()=>{ DB.set('transaksi_buku',(DB.get('transaksi_buku')||[]).filter(t=>t.id!==id)); renderTrxTable(); toast('Transaksi dihapus','error'); });
 }
 
@@ -2851,7 +2853,7 @@ function openModalHutang(){
 
 function saveHutang(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id=document.getElementById('mh-id').value;
   const jenis=document.getElementById('mh-jenis').value;
   const nama=document.getElementById('mh-nama').value.trim();
@@ -2901,7 +2903,7 @@ function lunaskanHutang(id){
 
 function hapusHutang(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus catatan ini?',()=>{ DB.set('hutang_piutang',(DB.get('hutang_piutang')||[]).filter(h=>h.id!==id)); renderHutang(); toast('Dihapus','error'); });
 }
 
@@ -3079,7 +3081,7 @@ function editPelanggan(id){
 
 function savePelanggan(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const id=document.getElementById('mcp-id').value;
   const nama=document.getElementById('mcp-nama').value.trim();
   const hp=document.getElementById('mcp-hp').value.trim();
@@ -3101,7 +3103,7 @@ function savePelanggan(){
 
 function hapusPelanggan(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus data pelanggan ini?',()=>{
     DB.set('pelanggan',(DB.get('pelanggan')||[]).filter(p=>p.id!==id));
     renderPelanggan(); toast('Dihapus','error');
@@ -3186,7 +3188,7 @@ function rmTagihanItem(idx){
 
 function saveTagihan(){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   const pid = document.getElementById('mtg-pelanggan').value;
   if(!pid) return toast('Pelanggan harus diisi', 'error');
   if(window._tagihanDraftItems.length===0) return toast('Item kosong!', 'error');
@@ -3245,7 +3247,7 @@ function lunasTagihan(id){
 
 function hapusTagihan(id){
   const session = getSession();
-  if(session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
+  if(!session || session.role !== 'admin'){ toast('Akses ditolak','error'); return; }
   konfirm('Hapus Faktur ini secara permanen?',()=>{
     DB.set('tagihan', (DB.get('tagihan')||[]).filter(x=>x.id!==id));
     renderTagihan();
