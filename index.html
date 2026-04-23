@@ -525,7 +525,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
   .app-mode-toggle{width:46px}
 }
 
-/* Safe area / notch support */
+/* Admin-only mobile menu items hidden by default, shown for admin */
+.admin-only { display: none !important; }
+body.is-admin .admin-only { display: flex !important; }
+
 @supports(padding-bottom:env(safe-area-inset-bottom)){
   @media(max-width:640px){
     .page-body{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
@@ -638,7 +641,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="nav-item" onclick="showPage('hpp')"><span class="nav-icon">🧮</span><span>Kalkulator HPP</span></div>
       </div>
 
-      <div class="nav-group">
+      <div class="nav-group" id="nav-keuangan">
         <div class="nav-label">Keuangan & B2B</div>
         <div class="nav-item" onclick="showPage('transaksi')"><span class="nav-icon">📝</span><span>Arus Kas (Masuk/Keluar)</span></div>
         <div class="nav-item" onclick="showPage('laporan-buku')"><span class="nav-icon">📈</span><span>Laporan Keuangan</span></div>
@@ -696,13 +699,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="mm-card" onclick="showPage('riwayat')"><div class="mm-icon">📋</div><div class="mm-text">Riwayat Kasir</div></div>
         <div class="mm-card" onclick="showPage('produk')"><div class="mm-icon">📦</div><div class="mm-text">Produk & Inventory</div></div>
         <div class="mm-card" onclick="showPage('hpp')"><div class="mm-icon">🧮</div><div class="mm-text">Kalkulator HPP</div></div>
-        <div class="mm-card" onclick="showPage('transaksi')"><div class="mm-icon">📝</div><div class="mm-text">Arus Kas</div></div>
-        <div class="mm-card" onclick="showPage('laporan-buku')"><div class="mm-icon">📈</div><div class="mm-text">Laporan Keuangan</div></div>
-        <div class="mm-card" onclick="showPage('pelanggan')"><div class="mm-icon">👥</div><div class="mm-text">Data Pelanggan</div></div>
-        <div class="mm-card" onclick="showPage('tagihan')"><div class="mm-icon">🧾</div><div class="mm-text">Buat Invoice</div></div>
-        <div class="mm-card" onclick="showPage('hutang')"><div class="mm-icon">🤝</div><div class="mm-text">Hutang & Piutang</div></div>
-        <div class="mm-card" onclick="showPage('users')"><div class="mm-icon">🧑‍</div><div class="mm-text">Pengelola (User)</div></div>
-        <div class="mm-card" onclick="showPage('setting')"><div class="mm-icon">⚙️</div><div class="mm-text">Setting Toko</div></div>
+        <div class="mm-card admin-only" onclick="showPage('transaksi')"><div class="mm-icon">📝</div><div class="mm-text">Arus Kas</div></div>
+        <div class="mm-card admin-only" onclick="showPage('laporan-buku')"><div class="mm-icon">📈</div><div class="mm-text">Laporan Keuangan</div></div>
+        <div class="mm-card admin-only" onclick="showPage('pelanggan')"><div class="mm-icon">👥</div><div class="mm-text">Data Pelanggan</div></div>
+        <div class="mm-card admin-only" onclick="showPage('tagihan')"><div class="mm-icon">🧾</div><div class="mm-text">Buat Invoice</div></div>
+        <div class="mm-card admin-only" onclick="showPage('hutang')"><div class="mm-icon">🤝</div><div class="mm-text">Hutang & Piutang</div></div>
+        <div class="mm-card admin-only" onclick="showPage('users')"><div class="mm-icon">🧑‍</div><div class="mm-text">Pengelola (User)</div></div>
+        <div class="mm-card admin-only" onclick="showPage('setting')"><div class="mm-icon">⚙️</div><div class="mm-text">Setting Toko</div></div>
       </div>
     </div>
 
@@ -1132,6 +1135,33 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div style="display:flex;gap:10px;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeModal('modal-user')" style="flex:1">Batal</button>
       <button class="btn btn-primary" onclick="saveUser()" style="flex:2">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GANTI PASSWORD -->
+<div class="modal-overlay hidden" id="modal-ganti-pass">
+  <div class="modal" style="max-width:420px">
+    <h3>🔑 Ganti Password</h3>
+    <input type="hidden" id="gp-user-id"/>
+    <div style="background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:18px" id="gp-user-label"></div>
+    <div class="form-group">
+      <label>Password Baru</label>
+      <div style="position:relative">
+        <input type="password" id="gp-new-pass" class="form-input" placeholder="Min. 6 karakter" style="padding-right:42px"/>
+        <button onclick="togglePassVis('gp-new-pass','eye-gp-new')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)" id="eye-gp-new">👁</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Konfirmasi Password Baru</label>
+      <div style="position:relative">
+        <input type="password" id="gp-confirm-pass" class="form-input" placeholder="Ulangi password baru" style="padding-right:42px"/>
+        <button onclick="togglePassVis('gp-confirm-pass','eye-gp-conf')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)" id="eye-gp-conf">👁</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ganti-pass')" style="flex:1">Batal</button>
+      <button class="btn btn-primary" onclick="saveGantiPass()" style="flex:2">Simpan Password</button>
     </div>
   </div>
 </div>
@@ -1661,7 +1691,15 @@ function loadApp(user){
   document.getElementById('sidebar-urole').textContent=user.role.toUpperCase();
   document.getElementById('sidebar-avatar').textContent=user.nama[0].toUpperCase();
   document.getElementById('topbar-avatar').textContent=user.nama[0].toUpperCase();
-  if(user.role==='admin') document.getElementById('nav-admin').style.display='block';
+  // Role-based navigation access
+  const isAdmin = user.role === 'admin';
+  // Show/hide admin menu (Pengelola & Setting)
+  document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
+  // Show/hide Keuangan & B2B group (hidden for kasir)
+  document.getElementById('nav-keuangan').style.display = isAdmin ? 'block' : 'none';
+  // Apply admin class to body for mobile menu CSS
+  document.body.classList.toggle('is-admin', isAdmin);
+
   applyTokoSettings();
   startClock();
   
@@ -1697,6 +1735,14 @@ const pageMap = {
 };
 
 function showPage(name){
+  // Role-based access guard
+  const session = getSession();
+  const kasirOnlyPages = ['kasir','riwayat','produk','hpp','dashboard-kasir','mobile-menu'];
+  if(session && session.role === 'kasir' && !kasirOnlyPages.includes(name)){
+    toast('Akses ditolak — halaman ini hanya untuk Admin','error');
+    return;
+  }
+
   Object.values(pageMap).forEach(p=>document.getElementById(p.el).classList.add('hidden'));
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const page=pageMap[name]; if(!page)return;
@@ -2230,7 +2276,10 @@ function renderUsers(){
     <td style="font-weight:600">${u.nama}</td>
     <td style="font-family:var(--font-mono)">${u.username}</td>
     <td><span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${u.role==='admin'?'rgba(245,200,66,.1)':'rgba(61,220,132,.1)'};color:${u.role==='admin'?'var(--accent)':'var(--green)'}">${u.role}</span></td>
-    <td>${u.id!==1?`<button class="btn-icon" onclick="hapusUser(${u.id})">🗑</button>`:''}</td>
+    <td style="display:flex;gap:6px;align-items:center">
+      <button class="btn-icon" title="Ganti Password" onclick="openModalGantiPass(${u.id})">🔑</button>
+      ${u.id!==1?`<button class="btn-icon" onclick="hapusUser(${u.id})">🗑</button>`:'<span style="font-size:10px;color:var(--muted)">super admin</span>'}
+    </td>
   </tr>`).join('');
 }
 
@@ -2251,6 +2300,34 @@ function saveUser(){
 
 function hapusUser(id){
   konfirm('Hapus user ini?',()=>{ DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id)); renderUsers(); });
+}
+
+function openModalGantiPass(id){
+  document.getElementById('gp-user-id').value = id;
+  const users = DB.get('users')||[];
+  const u = users.find(x=>x.id===id);
+  document.getElementById('gp-user-label').textContent = u ? `${u.nama} (${u.username})` : '';
+  document.getElementById('gp-new-pass').value = '';
+  document.getElementById('gp-confirm-pass').value = '';
+  openModal('modal-ganti-pass');
+}
+
+function saveGantiPass(){
+  const id = parseInt(document.getElementById('gp-user-id').value);
+  const newPass = document.getElementById('gp-new-pass').value;
+  const confirmPass = document.getElementById('gp-confirm-pass').value;
+  if(!newPass || newPass.length < 6){ toast('Password minimal 6 karakter','error'); return; }
+  if(newPass !== confirmPass){ toast('Konfirmasi password tidak cocok','error'); return; }
+  const users = DB.get('users')||[];
+  const idx = users.findIndex(u=>u.id===id);
+  if(idx === -1){ toast('User tidak ditemukan','error'); return; }
+  users[idx].password = hashPass(newPass);
+  DB.set('users', users);
+  // Update session if changing own password
+  const session = getSession();
+  if(session && session.id === id){ session.password = users[idx].password; setSession(session); }
+  closeModal('modal-ganti-pass');
+  toast('Password berhasil diubah ✅','success');
 }
 
 /* ============================================================
