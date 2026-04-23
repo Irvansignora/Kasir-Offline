@@ -1,6 +1,6 @@
 // KasirKu PWA Service Worker
-// Mendukung: localhost, GitHub Pages, Netlify, dan hosting lainnya
-const CACHE_VERSION = 'v2';
+// Mendukung: localhost,
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = 'kasirku-' + CACHE_VERSION;
 
 // File lokal yang di-cache (relative, akan di-resolve otomatis)
