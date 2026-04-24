@@ -57,7 +57,8 @@ body input,body select,body textarea{color:var(--text)}
 #license-wall{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);
   z-index:99999;display:flex;align-items:center;justify-content:center}
 .license-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;
-  padding:40px 36px;width:100%;max-width:460px;box-shadow:var(--shadow);text-align:center;animation:popIn .3s ease}
+  padding:40px 36px;width:100%;max-width:460px;box-shadow:var(--shadow);text-align:center;animation:popIn .3s ease;
+  max-height:90vh;overflow-y:auto}
 .license-box .lic-icon{font-size:52px;margin-bottom:16px}
 .license-box h2{font-family:var(--font-head);font-size:24px;font-weight:800;margin-bottom:8px}
 .license-box p{color:var(--muted);font-size:13px;margin-bottom:24px;line-height:1.6}
@@ -1345,10 +1346,10 @@ body.is-admin .admin-only { display: flex !important; }
       <label>🔑 Kunci Lisensi</label>
       <input type="text" id="lic-key-input" class="form-input" placeholder="UMKM-XXXX-XXXX-XXXX" style="font-family:var(--font-mono);letter-spacing:.05em" oninput="this.value=this.value.toUpperCase()"/>
     </div>
-    <button class="btn btn-primary w-full" onclick="activateLicense()" style="margin-top:4px">✅ Aktifkan Lisensi</button>
+    <button class="btn btn-primary w-full" onclick="activateLicense()" style="margin-top:4px;background:var(--accent);color:#0d0f14;font-weight:700;padding:12px 18px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;gap:6px;width:100%;font-size:14px;">✅ Aktifkan Lisensi</button>
 
-    <div style="margin-top:20px;font-size:11px;color:var(--muted)">
-      Butuh bantuan? <a href="#" style="color:var(--accent);text-decoration:underline" onclick="openWhatsApp()">Chat via WhatsApp</a>
+    <div style="margin-top:16px;">
+      <button onclick="openWhatsApp()" style="background:rgba(37,211,102,.15);color:#25d366;border:1px solid rgba(37,211,102,.35);border-radius:var(--radius-sm);padding:10px 18px;font-weight:600;font-size:13px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;">💬 Chat Developer via WhatsApp</button>
     </div>
   </div>
 </div>
