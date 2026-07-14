@@ -2386,14 +2386,18 @@ function exportProdukCSV(){
 function downloadTemplateProduk(){
   if(typeof XLSX === 'undefined'){ toast('Library Excel belum siap, coba lagi','error'); return; }
   const ws = XLSX.utils.aoa_to_sheet([
-    ['Nama Produk*','Kategori','Satuan','Stok*','Min Stok','Harga Modal','Harga Jual*'],
-    ['Indomie Goreng','Makanan','pcs','50','5','2500','3500'],
-    ['Aqua 600ml','Minuman','botol','30','5','2800','4000'],
-    ['--- Keterangan ---','','','','','',''],
-    ['* = wajib diisi','','','','','',''],
-    ['Hapus baris contoh sebelum import','','','','','',''],
+    ['Nama Produk*','Kategori','Satuan (kecil)','Stok*','Min Stok','Harga Modal','Harga Jual*','Satuan Besar','Isi per Satuan Besar','Harga Grosir (minQty:harga|minQty:harga)'],
+    ['Indomie Goreng','Makanan','pcs','50','5','2500','3500','','',''],
+    ['Aqua 600ml','Minuman','botol','30','5','2800','4000','','',''],
+    ['Beras Curah','Sembako','Kg','170','20','9000','11000','Karung','50','12:10500|50:10000'],
+    ['--- Keterangan ---','','','','','','','','',''],
+    ['* = wajib diisi','','','','','','','','',''],
+    ['Satuan Besar & Isi per Satuan Besar: opsional, isi kalau produk dijual eceran dari stok satuan besar (mis. 1 Karung = 50 Kg)','','','','','','','','',''],
+    ['Stok* selalu diisi dalam Satuan (kecil), bukan satuan besar','','','','','','','','',''],
+    ['Harga Grosir: opsional, format minQty:harga dipisah "|". Contoh 12:10500|50:10000 artinya beli >=12 harga 10500, >=50 harga 10000','','','','','','','','',''],
+    ['Hapus baris contoh & keterangan sebelum import','','','','','','','','',''],
   ]);
-  ws['!cols'] = [{wch:22},{wch:15},{wch:10},{wch:8},{wch:10},{wch:14},{wch:12}];
+  ws['!cols'] = [{wch:22},{wch:15},{wch:12},{wch:8},{wch:10},{wch:14},{wch:12},{wch:14},{wch:16},{wch:34}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Template Produk');
   XLSX.writeFile(wb, 'template_import_produk.xlsx');
@@ -2408,8 +2412,8 @@ function importProdukExcel(input){
   const ext = file.name.split('.').pop().toLowerCase();
   
   const processData = (rows) => {
-    // Skip header row
-    const dataRows = rows.slice(1).filter(r => r[0] && String(r[0]).trim() && !String(r[0]).startsWith('---') && !String(r[0]).startsWith('*'));
+    // Skip header row, dan baris contoh/keterangan (kolom pertama diawali --- atau * atau merupakan kalimat panjang keterangan)
+    const dataRows = rows.slice(1).filter(r => r[0] && String(r[0]).trim() && !String(r[0]).startsWith('---') && !String(r[0]).startsWith('*') && !String(r[0]).toLowerCase().includes('satuan besar') && !String(r[0]).toLowerCase().includes('harga grosir') && !String(r[0]).toLowerCase().startsWith('stok*'));
     if(!dataRows.length){ toast('Tidak ada data produk yang valid di file','error'); return; }
     
     let produk = DB.get('produk') || [];
@@ -2424,6 +2428,13 @@ function importProdukExcel(input){
       const minStok = parseInt(r[4]) || 5;
       const modal = parseInt(r[5]) || 0;
       const harga = parseInt(r[6]) || 0;
+      const satuanBesar = String(r[7]||'').trim();
+      const isiPerBesar = parseFloat(r[8]) || 0;
+      const grosirRaw = String(r[9]||'').trim();
+      const grosir = grosirRaw ? grosirRaw.split('|').map(part=>{
+        const [mq,hg] = part.split(':').map(v=>parseFloat(String(v).trim()));
+        return { minQty: mq||0, harga: hg||0 };
+      }).filter(g=>g.minQty>0 && g.harga>0).sort((a,b)=>a.minQty-b.minQty) : [];
       
       if(!nama){ errors++; return; }
       if(harga <= 0){ errors++; return; }
@@ -2431,11 +2442,11 @@ function importProdukExcel(input){
       // Cek apakah nama sudah ada (update stok & harga)
       const existIdx = produk.findIndex(p => p.nama.toLowerCase() === nama.toLowerCase());
       if(existIdx > -1){
-        produk[existIdx] = {...produk[existIdx], nama, kategori, satuan, stok, minStok, modal, harga};
+        produk[existIdx] = {...produk[existIdx], nama, kategori, satuan, stok, minStok, modal, harga, satuanBesar, isiPerBesar, grosir};
         updated++;
       } else {
         maxId++;
-        produk.push({id:maxId, nama, kategori, satuan, stok, minStok, modal, harga});
+        produk.push({id:maxId, nama, kategori, satuan, stok, minStok, modal, harga, satuanBesar, isiPerBesar, grosir});
         added++;
       }
     });
