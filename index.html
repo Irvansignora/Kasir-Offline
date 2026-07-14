@@ -320,6 +320,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .bahan-row input{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);transition:border-color .2s}
 .bahan-row input:focus{border-color:var(--accent)}
 .bahan-row .nama-bahan{flex:2}.bahan-row .jml-bahan{flex:0 0 70px}.bahan-row .sat-bahan{flex:0 0 60px}.bahan-row .harga-bahan{flex:1}
+.grosir-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.grosir-row input{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);transition:border-color .2s;flex:1}
+.grosir-row input:focus{border-color:var(--accent)}
+.grosir-row .gr-minqty{flex:0 0 90px}
+.konversi-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.badge-grosir{display:inline-block;font-size:9px;font-weight:700;color:var(--accent);background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.25);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.pc-grosir-hint{font-size:9px;color:var(--accent);margin-top:2px}
 .hasil-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-top:16px}
 .hasil-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
 .hasil-row:not(:last-child){border-bottom:1px solid var(--border)}
@@ -1166,14 +1173,37 @@ body.is-admin .admin-only { display: flex !important; }
       <div class="form-group"><label>Kategori</label><input type="text" id="mp-kategori" class="form-input" placeholder="Makanan" list="kategori-list"/></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-      <div class="form-group"><label>Qty Stok</label><input type="number" id="mp-stok" class="form-input" placeholder="0"/></div>
+      <div class="form-group"><label>Qty Stok <span style="color:var(--muted);font-weight:400">(satuan jual/kecil)</span></label><input type="number" id="mp-stok" class="form-input" placeholder="0" oninput="updateKonversiHint()"/><div class="konversi-hint" id="mp-stok-hint"></div></div>
       <div class="form-group"><label>Min Stok</label><input type="number" id="mp-min" class="form-input" placeholder="5" value="5"/></div>
-      <div class="form-group"><label>Satuan</label><input type="text" id="mp-satuan" class="form-input" placeholder="pcs"/></div>
+      <div class="form-group"><label>Satuan Jual (kecil)</label><input type="text" id="mp-satuan" class="form-input" placeholder="Kg / pcs" oninput="updateKonversiHint()"/></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group"><label>Harga Modal / HPP (Rp)</label><input type="number" id="mp-modal" class="form-input" placeholder="0"/></div>
-      <div class="form-group"><label>Harga Jual (Rp)</label><input type="number" id="mp-harga" class="form-input" placeholder="0"/></div>
+      <div class="form-group"><label>Harga Modal / HPP (Rp) <span style="color:var(--muted);font-weight:400">per satuan kecil</span></label><input type="number" id="mp-modal" class="form-input" placeholder="0"/></div>
+      <div class="form-group"><label>Harga Jual (Rp) <span style="color:var(--muted);font-weight:400">per satuan kecil</span></label><input type="number" id="mp-harga" class="form-input" placeholder="0"/></div>
     </div>
+
+    <div style="margin-top:6px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">📦 Konversi Satuan Besar / Curah (Opsional)</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Isi jika produk dibeli dalam satuan besar (mis. Karung 50kg) tapi dijual eceran per satuan kecil (mis. Kg). Stok tetap disimpan &amp; terpotong dalam satuan kecil secara otomatis saat transaksi.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>Nama Satuan Besar</label><input type="text" id="mp-satuan-besar" class="form-input" placeholder="Karung / Sak" oninput="updateKonversiHint()"/></div>
+        <div class="form-group"><label>Isi per Satuan Besar</label><input type="number" id="mp-isi-besar" class="form-input" placeholder="50" oninput="updateKonversiHint()"/></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:end;margin-top:4px">
+        <div class="form-group" style="flex:1;margin-bottom:0"><label>Tambah Stok Masuk (dalam Satuan Besar)</label><input type="number" id="mp-stok-masuk-besar" class="form-input" placeholder="Cth: 2 Karung"/></div>
+        <button type="button" class="btn btn-ghost" style="height:38px" onclick="tambahStokDariSatuanBesar()">➕ Tambah ke Stok</button>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--text)">🏷️ Harga Grosir Bertingkat (Opsional)</div>
+        <button type="button" class="btn-icon" onclick="addGrosirRow()" title="Tambah level harga">➕</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Contoh: beli ≥12 pcs otomatis Rp9.000/pcs, beli ≥50 pcs otomatis Rp8.000/pcs. Kosongkan jika tidak ada harga grosir.</div>
+      <div id="grosir-list"></div>
+    </div>
+
     <datalist id="kategori-list"></datalist>
     <div style="display:flex;gap:10px;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeModal('modal-produk')" style="flex:1">Batal</button>
@@ -1962,22 +1992,96 @@ function selectMetode(el){
   document.getElementById('noncash-section').classList.toggle('hidden',isCash);
 }
 
+/* ============================================================
+   HARGA GROSIR & KONVERSI SATUAN BESAR
+============================================================ */
+window._mpGrosir = [];
+
+function renderGrosirList(){
+  const el=document.getElementById('grosir-list');
+  if(!window._mpGrosir.length){ el.innerHTML='<div class="empty-state" style="padding:10px 0"><div style="font-size:11px">Belum ada level harga grosir</div></div>'; return; }
+  el.innerHTML=window._mpGrosir.map((g,i)=>`
+    <div class="grosir-row">
+      <input class="gr-minqty" type="number" placeholder="Min qty" value="${g.minQty||''}" oninput="updateGrosirRow(${i},'minQty',this.value)"/>
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap">pcs/kg →</span>
+      <input type="number" placeholder="Harga per satuan" value="${g.harga||''}" oninput="updateGrosirRow(${i},'harga',this.value)"/>
+      <button type="button" class="btn-icon" onclick="removeGrosirRow(${i})">🗑</button>
+    </div>`).join('');
+}
+
+function addGrosirRow(){
+  window._mpGrosir.push({minQty:0,harga:0});
+  renderGrosirList();
+}
+
+function removeGrosirRow(i){
+  window._mpGrosir.splice(i,1);
+  renderGrosirList();
+}
+
+function updateGrosirRow(i,key,val){
+  if(window._mpGrosir[i]) window._mpGrosir[i][key]=parseFloat(val)||0;
+}
+
+function updateKonversiHint(){
+  const stok=parseFloat(document.getElementById('mp-stok')?.value)||0;
+  const satuan=document.getElementById('mp-satuan')?.value||'satuan';
+  const satuanBesar=document.getElementById('mp-satuan-besar')?.value||'';
+  const isiBesar=parseFloat(document.getElementById('mp-isi-besar')?.value)||0;
+  const hint=document.getElementById('mp-stok-hint');
+  if(!hint) return;
+  if(satuanBesar && isiBesar>0){
+    const jmlBesar=(stok/isiBesar);
+    hint.textContent=`= ${jmlBesar.toFixed(2)} ${satuanBesar} (1 ${satuanBesar} = ${isiBesar} ${satuan||'satuan'})`;
+  } else {
+    hint.textContent='';
+  }
+}
+
+function tambahStokDariSatuanBesar(){
+  const isiBesar=parseFloat(document.getElementById('mp-isi-besar')?.value)||0;
+  const satuanBesar=document.getElementById('mp-satuan-besar')?.value||'';
+  const jmlBesar=parseFloat(document.getElementById('mp-stok-masuk-besar')?.value)||0;
+  if(!satuanBesar||isiBesar<=0){ toast('Isi dulu Nama Satuan Besar & Isi per Satuan Besar','error'); return; }
+  if(jmlBesar<=0){ toast('Isi jumlah stok masuk terlebih dahulu','error'); return; }
+  const stokEl=document.getElementById('mp-stok');
+  const stokSekarang=parseFloat(stokEl.value)||0;
+  const tambahan=jmlBesar*isiBesar;
+  stokEl.value=stokSekarang+tambahan;
+  document.getElementById('mp-stok-masuk-besar').value='';
+  updateKonversiHint();
+  toast(`+${tambahan} ${document.getElementById('mp-satuan').value||'satuan'} ditambahkan ke stok (${jmlBesar} ${satuanBesar})`,'success');
+}
+
+// Ambil harga efektif produk berdasarkan qty beli (menerapkan harga grosir bertingkat jika ada)
+function getHargaByQty(produk,qty){
+  if(!produk) return 0;
+  const tiers=(produk.grosir||[]).filter(g=>g.minQty>0&&g.harga>0).sort((a,b)=>b.minQty-a.minQty);
+  for(const t of tiers){ if(qty>=t.minQty) return t.harga; }
+  return produk.harga;
+}
+
 function renderProductGrid(){
+
   const q=(document.getElementById('kasir-search')?.value||'').toLowerCase();
   const cat=window._kasirCat||'';
   const produk=(DB.get('produk')||[]).filter(p=>(p.nama.toLowerCase().includes(q)||String(p.id).includes(q))&&(!cat||p.kategori===cat));
   const grid=document.getElementById('product-grid');
   if(!produk.length){ grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><div>Produk tidak ditemukan</div></div>`; return; }
-  grid.innerHTML=produk.map(p=>`
+  grid.innerHTML=produk.map(p=>{
+    const grosirHint=(p.grosir&&p.grosir.length)?`<div class="pc-grosir-hint">🏷️ Grosir ≥${p.grosir[0].minQty}: ${rp(p.grosir[0].harga)}</div>`:'';
+    return `
     <div class="product-card ${p.stok===0?'out-of-stock':''}" onclick="addToCart(${p.id})">
       ${p.kategori?`<div style="font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">${p.kategori}</div>`:''}
       <div class="pc-name">${p.nama}</div>
       <div class="pc-price">${rp(p.harga)}</div>
+      ${grosirHint}
       <div class="pc-stock">Stok: ${p.stok===0?'❌ Habis':p.stok}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function getCartTotal(){ return cart.reduce((s,c)=>s+c.produk.harga*c.qty,0); }
+function getCartTotal(){ return cart.reduce((s,c)=>s+getHargaByQty(c.produk,c.qty)*c.qty,0); }
 
 function addToCart(produkId){
   const produk=(DB.get('produk')||[]).find(p=>p.id===produkId); if(!produk)return;
@@ -2006,18 +2110,22 @@ function renderCart(){
     return;
   }
   countEl.textContent=cart.reduce((s,c)=>s+c.qty,0)+' item';
-  itemsEl.innerHTML=cart.map(c=>`
+  itemsEl.innerHTML=cart.map(c=>{
+    const hargaEfektif=getHargaByQty(c.produk,c.qty);
+    const isGrosir=hargaEfektif!==c.produk.harga;
+    return `
     <div class="cart-item">
       <div style="flex:1">
-        <div class="cart-item-name">${c.produk.nama}</div>
-        <div class="cart-item-price">${rp(c.produk.harga)} × ${c.qty} = ${rp(c.produk.harga*c.qty)}</div>
+        <div class="cart-item-name">${c.produk.nama}${isGrosir?'<span class="badge-grosir">🏷️ Grosir</span>':''}</div>
+        <div class="cart-item-price">${rp(hargaEfektif)} × ${c.qty} = ${rp(hargaEfektif*c.qty)}</div>
       </div>
       <div class="qty-ctrl">
         <button class="qty-btn" onclick="updateQty(${c.produk.id},-1)">−</button>
         <span class="qty-num">${c.qty}</span>
         <button class="qty-btn" onclick="updateQty(${c.produk.id},+1)">+</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   calcTotal();
 }
 
@@ -2079,7 +2187,7 @@ function processTransaction(){
     id:trxId, kasir:user.nama,
     pelanggan:document.getElementById('pelanggan-input').value.trim()||'',
     metode:_metode, waktu:new Date().toISOString(),
-    items:cart.map(c=>({id:c.produk.id,nama:c.produk.nama,harga:c.produk.harga,modal:c.produk.modal||0,qty:c.qty,subtotal:c.produk.harga*c.qty})),
+    items:cart.map(c=>{ const h=getHargaByQty(c.produk,c.qty); return {id:c.produk.id,nama:c.produk.nama,harga:h,modal:c.produk.modal||0,qty:c.qty,subtotal:h*c.qty}; }),
     subtotal, diskon, pajak:s.pajak, total, bayar, kembalian,
   };
 
@@ -2166,11 +2274,15 @@ function renderProdukTable(){
       const thresh=p.minStok || getSetting().lowStock || 5;
       const bc=p.stok<=0?'zero':p.stok<=thresh?'low':'ok';
       const bl=p.stok<=0?'Habis':p.stok<=thresh?`Menipis (${p.stok})`:p.stok;
-      const stkTxt = p.satuan ? `${bl} ${p.satuan}` : bl;
+      let stkTxt = p.satuan ? `${bl} ${p.satuan}` : bl;
+      if(p.stok>0 && p.satuanBesar && p.isiPerBesar>0){
+        stkTxt += ` <span style="color:var(--muted);font-weight:400">(≈${(p.stok/p.isiPerBesar).toFixed(2)} ${p.satuanBesar})</span>`;
+      }
       const margin=p.modal>0?Math.round(((p.harga-p.modal)/p.harga)*100):null;
+      const grosirBadge=(p.grosir&&p.grosir.length)?`<span class="badge-grosir" title="${p.grosir.map(g=>`≥${g.minQty} = ${rp(g.harga)}`).join(', ')}">🏷️ Grosir</span>`:'';
       return `<tr>
         <td style="font-family:var(--font-mono);color:var(--muted);font-size:11px">#${p.id}</td>
-        <td style="font-weight:600">${p.nama}</td>
+        <td style="font-weight:600">${p.nama}${grosirBadge}</td>
         <td>${p.kategori?`<span class="cat-badge">${p.kategori}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
         <td><span class="badge-stock ${bc}">${stkTxt}</span></td>
         <td style="font-family:var(--font-mono)">${p.modal?rp(p.modal):'—'}</td>
@@ -2201,8 +2313,9 @@ function renderProdukTable(){
 
 function openModalProduk(){
   document.getElementById('modal-produk-title').textContent='➕ Tambah Produk & Stok';
-  ['mp-id','mp-nama','mp-harga','mp-modal','mp-stok','mp-min','mp-satuan','mp-kategori'].forEach(id=>document.getElementById(id).value='');
+  ['mp-id','mp-nama','mp-harga','mp-modal','mp-stok','mp-min','mp-satuan','mp-kategori','mp-satuan-besar','mp-isi-besar','mp-stok-masuk-besar'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mp-min').value = getSetting().lowStock || 5;
+  window._mpGrosir=[]; renderGrosirList(); updateKonversiHint();
   openModal('modal-produk');
 }
 
@@ -2217,6 +2330,11 @@ function editProduk(id){
   document.getElementById('mp-min').value=p.minStok||5;
   document.getElementById('mp-satuan').value=p.satuan||'';
   document.getElementById('mp-kategori').value=p.kategori||'';
+  document.getElementById('mp-satuan-besar').value=p.satuanBesar||'';
+  document.getElementById('mp-isi-besar').value=p.isiPerBesar||'';
+  document.getElementById('mp-stok-masuk-besar').value='';
+  window._mpGrosir=(p.grosir||[]).map(g=>({...g}));
+  renderGrosirList(); updateKonversiHint();
   openModal('modal-produk');
 }
 
@@ -2231,17 +2349,20 @@ function saveProduk(){
   const minStok=parseInt(document.getElementById('mp-min').value)||5;
   const satuan=document.getElementById('mp-satuan').value.trim();
   const kategori=document.getElementById('mp-kategori').value.trim();
+  const satuanBesar=document.getElementById('mp-satuan-besar').value.trim();
+  const isiPerBesar=parseFloat(document.getElementById('mp-isi-besar').value)||0;
+  const grosir=window._mpGrosir.filter(g=>g.minQty>0&&g.harga>0).sort((a,b)=>a.minQty-b.minQty);
   if(!nama){ toast('Nama produk wajib diisi','error'); return; }
   if(isNaN(harga)||harga<0){ toast('Harga tidak valid','error'); return; }
   if(isNaN(stok)||stok<0){ toast('Stok tidak valid','error'); return; }
   let produk=DB.get('produk')||[];
   if(id){
     const idx=produk.findIndex(p=>p.id===parseInt(id));
-    if(idx>-1) produk[idx]={...produk[idx],nama,harga,modal,stok,minStok,satuan,kategori};
+    if(idx>-1) produk[idx]={...produk[idx],nama,harga,modal,stok,minStok,satuan,kategori,satuanBesar,isiPerBesar,grosir};
     toast('Produk & Stok diperbarui ✅','success');
   } else {
     const newId=produk.length>0?Math.max(...produk.map(p=>p.id))+1:1;
-    produk.push({id:newId,nama,harga,modal,stok,minStok,satuan,kategori});
+    produk.push({id:newId,nama,harga,modal,stok,minStok,satuan,kategori,satuanBesar,isiPerBesar,grosir});
     toast('Produk & Stok ditambahkan ✅','success');
   }
   DB.set('produk',produk); closeModal('modal-produk'); renderProdukTable();
@@ -2255,7 +2376,7 @@ function hapusProduk(id){
 
 function exportProdukCSV(){
   const produk=DB.get('produk')||[];
-  const rows=[['ID','Nama','Kategori','Satuan','Stok','Min Stok','Harga Modal','Harga Jual'],...produk.map(p=>[p.id,p.nama,p.kategori||'',p.satuan||'',p.stok,p.minStok||5,p.modal||0,p.harga])];
+  const rows=[['ID','Nama','Kategori','Satuan','Stok','Min Stok','Harga Modal','Harga Jual','Satuan Besar','Isi per Satuan Besar','Harga Grosir (minQty:harga)'],...produk.map(p=>[p.id,p.nama,p.kategori||'',p.satuan||'',p.stok,p.minStok||5,p.modal||0,p.harga,p.satuanBesar||'',p.isiPerBesar||'',(p.grosir||[]).map(g=>`${g.minQty}:${g.harga}`).join('|')])];
   downloadCSV(rows,'produk_inventory_'+Date.now()+'.csv');
 }
 
